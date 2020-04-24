@@ -7,6 +7,8 @@ import red from '@material-ui/core/colors/red';
 import grey from '@material-ui/core/colors/grey';
 import amber from '@material-ui/core/colors/amber';
 import pink from '@material-ui/core/colors/pink';
+import CasesByDayChart from '../components/CasesByDayChart';
+import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 
 const useStyles = makeStyles({
   container: {
@@ -43,6 +45,14 @@ function Dashboard() {
           <Grid item xs={12} sm={6} md={6} lg={2}>
             <KPICard title="Tested cases" data="74557" color={pink[400]}/>
           </Grid>
+
+          <Grid item xs={12} lg={6}>
+            <CasesByDayChart />
+          </Grid>
+          <Grid item xs={12} lg={6}>
+            <CasesByDayChartCumulative />
+          </Grid>
+
         </Grid>
       </Container>
     )
