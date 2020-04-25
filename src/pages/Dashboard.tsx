@@ -10,8 +10,8 @@ import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
 import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types'
-import fetchData from '../store/actions/actions';
+import PropTypes from 'prop-types';
+import { fetchData } from '../store/actions/actions';
 
 const styles: (theme: Theme) => StyleRules<string> = theme =>
   createStyles({
@@ -20,22 +20,25 @@ const styles: (theme: Theme) => StyleRules<string> = theme =>
     },
 })
 
-interface IMyProps { 
-  
-}
+interface IMyProps { }
 
-interface IMyState { 
 
-}
+interface IMyState { }
 
-type Props = IMyProps & WithStyles<typeof styles>
+// type Props = IMyProps & WithStyles<typeof styles>
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps> & {
+    test: any;
+  } & 
+  IMyProps &
+  WithStyles<typeof styles>;
 
-// class Dashboard extends Component<MyProps, MyState> {
 class Dashboard extends Component<Props, IMyState> {
   componentDidMount() {
-    fetchData()
+    console.log(`Dashboard componentDidMount`)
+    this.props.test()
   }
-  
+
   render() {
     const { classes } = this.props;
 
@@ -94,10 +97,9 @@ function mapStateToProps(state: any) {
   }
 }
 
-const mapDispatchToProps = (dispatch: any)  => {
+const mapDispatchToProps = dispatch => {
   return {
-    fetchData: () => dispatch(fetchData()),
-    dispatch
+    test: () => dispatch(fetchData())
   }
 }
 

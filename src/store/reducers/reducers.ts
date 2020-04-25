@@ -7,7 +7,7 @@ import { combineReducers } from 'redux';
 
 const initialState = {
   pending: false,
-  data: [],
+  data: null,
   error: null
 }
 
