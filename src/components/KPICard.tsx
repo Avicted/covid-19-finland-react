@@ -32,10 +32,4 @@ function KPICard(props: {title: String, data: String, color: String}) {
   )
 }
 
-/* KPICard.propTypes = {
-  title: String,
-  data: String,
-  color: String
-} */
-
 export default KPICard

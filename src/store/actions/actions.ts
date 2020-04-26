@@ -1,28 +1,44 @@
-export const FETCH_DATA_PENDING = 'FETCH_DATA_PENDING';
-export const FETCH_DATA_SUCCESS = 'FETCH_DATA_SUCCESS';
-export const FETCH_DATA_ERROR = 'FETCH_DATA_ERROR';
+import { HcdTestData } from "../../models/HcdTestData";
+import { 
+  AppActions, 
+  FETCH_DATA_PENDING, 
+  FETCH_DATA_SUCCESS, 
+  FETCH_DATA_ERROR, 
+  FETCH_HCD_TEST_DATA_PENDING, 
+  FETCH_HCD_TEST_DATA_SUCCESS, 
+  FETCH_HCD_TEST_DATA_ERROR 
+} from "../../models/actions";
 
-export function fetchDataPending() {
-  return {
-    type: FETCH_DATA_PENDING
-  }
-}
 
-export function fetchDataSuccess(data: any) {
-  return {
-    type: FETCH_DATA_SUCCESS,
-    data: data
-  }
-}
+export const fetchDataPending = (): AppActions => ({
+  type: FETCH_DATA_PENDING,
+})
 
-export function fetchDataError(error: any) {
-  return {
-    type: FETCH_DATA_ERROR,
-    error: error
-  }
-}
+export const fetchDataSuccess = (data: any): AppActions => ({
+  type: FETCH_DATA_SUCCESS,
+  payload: data
+})
 
-export function fetchData() {
+export const fetchDataError = (error: Boolean): AppActions => ({
+  type: FETCH_DATA_ERROR,
+  error: error
+})
+
+export const fetchHcdTestDataPending = (): AppActions => ({
+  type: FETCH_HCD_TEST_DATA_PENDING
+})
+
+export const fetchHcdTestDataSuccess = (data: HcdTestData): AppActions => ({
+  type: FETCH_HCD_TEST_DATA_SUCCESS,
+  payload: data
+})
+
+export const fetchHcdTestDataError = (error: Boolean): AppActions => ({
+  type: FETCH_HCD_TEST_DATA_ERROR,
+  error: error
+})
+
+export function fetchFinnishCoronaData() {
   return async (dispatch: any) => {
     dispatch(fetchDataPending());
     await fetch('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
@@ -37,6 +53,25 @@ export function fetchData() {
       })
       .catch(error => {
         dispatch(fetchDataError(error));
+      })
+  }
+}
+
+export function fetchHcdTestData() {
+  return async (dispatch: any) => {
+    dispatch(fetchHcdTestDataPending());
+    await fetch('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/hcdTestData')
+      .then(res => res.json())
+      .then(res => {
+        if (res.error) {
+          throw (res.error);
+        }
+
+        dispatch(fetchHcdTestDataSuccess(res));
+        return res;
+      })
+      .catch(error => {
+        dispatch(fetchHcdTestDataError(error));
       })
   }
 }

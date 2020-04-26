@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Container, Grid, Box, makeStyles, withStyles, withWidth, Theme, StyleRules, createStyles, WithStyles } from '@material-ui/core'
+import { Container, Grid, Box, withStyles, Theme, StyleRules, createStyles, WithStyles } from '@material-ui/core'
 import KPICard from '../components/KPICard'
 import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
@@ -10,10 +10,10 @@ import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
 import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { fetchData } from '../store/actions/actions';
+import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
+import { getHcdTestData, getDataError, getFinnishCoronaData, getHcdTestDataPending, getFinnishCoronaDataPending } from '../store/reducers/reducer';
 
-const styles: (theme: Theme) => StyleRules<string> = theme =>
+const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
     container: {
       marginTop: 20
@@ -21,26 +21,38 @@ const styles: (theme: Theme) => StyleRules<string> = theme =>
 })
 
 interface IMyProps { }
-
-
 interface IMyState { }
 
-// type Props = IMyProps & WithStyles<typeof styles>
 type Props = ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps> & {
-    test: any;
-  } & 
+  ReturnType<typeof mapDispatchToProps>& 
   IMyProps &
-  WithStyles<typeof styles>;
+  WithStyles<typeof styles>
+
 
 class Dashboard extends Component<Props, IMyState> {
+  constructor(props: Readonly<Props>) {
+    super(props);
+    this.shouldComponentRender = this.shouldComponentRender.bind(this);
+  }
+
   componentDidMount() {
     console.log(`Dashboard componentDidMount`)
-    this.props.test()
+    this.props.fetchHcdTestData()
+    this.props.fetchFinnishCoronaData()
+  }
+
+  shouldComponentRender() {
+    const { hcdTestDataPending, finnishCoronaDataPending } = this.props;
+    if (hcdTestDataPending === true && finnishCoronaDataPending === true) return false;
+    return true;
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, error, hcdTestDataPending } = this.props;
+
+    if (!this.shouldComponentRender()) {
+      return (<div>Loading...</div>)
+    }
 
     return (
       <Container className={classes.container} maxWidth="xl">
@@ -48,10 +60,14 @@ class Dashboard extends Component<Props, IMyState> {
           <Grid item xs={12}>
             <Box fontWeight="fontWeightLight" fontSize="h4.fontSize">
               Finland COVID-19 data
+              <br></br>
+              <span>error: { error }</span>
+              <br></br>
+              <span>hcdTestDataPending: { hcdTestDataPending }</span>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Confirmed cases" data="4395" color={purple[200]} />
+            <KPICard title="Confirmed cases" data={this.props.hcdTestData} color={purple[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
             <KPICard title="Recovered cases" data="10" color={green[200]} />
@@ -82,24 +98,18 @@ class Dashboard extends Component<Props, IMyState> {
   }
 }
 
-/* Dashboard.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  classes: PropTypes.object.isRequired,
-} */
+const mapStateToProps = (state: any) => ({
+  hcdTestDataPending: getHcdTestDataPending(state),
+  hcdTestData: getHcdTestData(state),
+  finnishCoronaData: getFinnishCoronaData(state),
+  finnishCoronaDataPending: getFinnishCoronaDataPending(state),
+  error: getDataError(state),
+})
 
-function mapStateToProps(state: any) {
-  const { pending, data, error } = state
-
+const mapDispatchToProps = (dispatch: any) => {
   return {
-    pending,
-    data,
-    error
-  }
-}
-
-const mapDispatchToProps = dispatch => {
-  return {
-    test: () => dispatch(fetchData())
+    fetchHcdTestData: () => dispatch(fetchHcdTestData()),
+    fetchFinnishCoronaData: () => dispatch(fetchFinnishCoronaData()),
   }
 }
 
