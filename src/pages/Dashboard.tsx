@@ -67,7 +67,7 @@ class Dashboard extends Component<Props, IMyState> {
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Confirmed cases" data={this.props.hcdTestData} color={purple[200]} />
+            <KPICard title="Confirmed cases" data="123" color={purple[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
             <KPICard title="Recovered cases" data="10" color={green[200]} />

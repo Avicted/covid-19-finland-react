@@ -1,9 +1,10 @@
 import { HcdTestData } from '../../models/HcdTestData';
 import { DataActionTypes } from '../../models/actions';
+import { FinnishCoronaData } from '../../models/FinnishCoronaData';
 
 export type State = {
   readonly finnishCoronaDataPending: Boolean;
-  readonly finnishCoronaData: any;
+  readonly finnishCoronaData: FinnishCoronaData;
   readonly hcdTestDataPending: Boolean;
   readonly hcdTestData: HcdTestData;
   readonly error: Boolean;
@@ -11,7 +12,11 @@ export type State = {
 
 const initialState: State = {
   finnishCoronaDataPending: false,
-  finnishCoronaData: null,
+  finnishCoronaData: {
+    confirmed: [],
+    deaths: [],
+    recovered: []
+  },
   hcdTestDataPending: false,
   hcdTestData: {},
   error: false
@@ -30,13 +35,13 @@ const dataReducer = (state = initialState, action: DataActionTypes) => {
     case "FETCH_DATA_SUCCESS":
       return {
         ...state,
-        pending: false,
+        finnishCoronaDataPending: false,
         finnishCoronaData: action.payload
       }
     case "FETCH_DATA_ERROR":
       return {
         ...state,
-        pending: false,
+        finnishCoronaDataPending: false,
         error: action.error
       }
     case "FETCH_HCD_TEST_DATA_PENDING":
@@ -47,13 +52,13 @@ const dataReducer = (state = initialState, action: DataActionTypes) => {
     case "FETCH_HCD_TEST_DATA_SUCCESS":
       return {
         ...state,
-        pending: false,
+        hcdTestDataPending: false,
         hcdTestData: action.payload
       }
     case "FETCH_HCD_TEST_DATA_ERROR":
       return {
         ...state,
-        pending: false,
+        hcdTestDataPending: false,
         error: action.error
       }
     default:
@@ -63,8 +68,8 @@ const dataReducer = (state = initialState, action: DataActionTypes) => {
 
 export { dataReducer }
 
-export const getFinnishCoronaData = (state: { finnishCoronaData: any; }) => state.finnishCoronaData;
-export const getHcdTestData = (state: { hcdTestData: any; }) => state.hcdTestData;
+export const getFinnishCoronaData = (state: { finnishCoronaData: FinnishCoronaData; }) => state.finnishCoronaData;
+export const getHcdTestData = (state: { hcdTestData: HcdTestData; }) => state.hcdTestData;
 export const getFinnishCoronaDataPending = (state: { finnishCoronaDataPending: Boolean; }) => state.finnishCoronaDataPending;
 export const getHcdTestDataPending = (state: { finnishCoronaDataPending: Boolean; }) => state.finnishCoronaDataPending;
 export const getDataError = (state: { error: Boolean; }) => state.error;

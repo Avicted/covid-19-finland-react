@@ -1,4 +1,3 @@
-import { HcdTestData } from "../../models/HcdTestData";
 import { 
   AppActions, 
   FETCH_DATA_PENDING, 
@@ -8,13 +7,15 @@ import {
   FETCH_HCD_TEST_DATA_SUCCESS, 
   FETCH_HCD_TEST_DATA_ERROR 
 } from "../../models/actions";
+import { HcdTestData } from "../../models/HcdTestData";
+import { FinnishCoronaData } from "../../models/FinnishCoronaData";
 
 
 export const fetchDataPending = (): AppActions => ({
   type: FETCH_DATA_PENDING,
 })
 
-export const fetchDataSuccess = (data: any): AppActions => ({
+export const fetchDataSuccess = (data: FinnishCoronaData): AppActions => ({
   type: FETCH_DATA_SUCCESS,
   payload: data
 })
