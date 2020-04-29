@@ -1,7 +1,6 @@
 import { HcdTestData } from '../../models/HcdTestData';
 import { DataActionTypes } from '../../models/actions';
 import { FinnishCoronaData } from '../../models/FinnishCoronaData';
-import { AppState } from '../configureStore';
 
 export type State = {
   readonly finnishCoronaDataPending: Boolean;
@@ -82,4 +81,30 @@ export const getPercentageOfPopulationTested = (state: State) => {
   } else {
     return 0;
   }
+}
+
+export const getConfirmedChartData = (state: State) => {
+  const confirmed = getFinnishCoronaData(state).confirmed
+
+  if (confirmed.length <= 0) {
+    return null;
+  }
+
+  // @TODO: research typescript Record
+  let chartDataMap: Map<any, any> = new Map()
+
+  for (let i = 0; i < confirmed.length; i++) {
+    const element = confirmed[i];
+    const timestamp = new Date(element.date).getTime()
+
+    if (chartDataMap.has(timestamp)) {
+      chartDataMap.get(timestamp).value++
+    } else {
+      chartDataMap.set(timestamp, { value: 1, time: timestamp })
+    }
+  }
+
+  let chartDataArray: { time: number, value: number }[] = [];
+  chartDataMap.forEach(element => chartDataArray.push(element))
+  return chartDataArray;
 }

@@ -13,15 +13,16 @@ const useStyles = makeStyles({
   }
 });
 
-function CasesByDayChart() {
+function CasesByDayChart(props: { data: any }) {
   const classes = useStyles();
-  const data = [
+  const { data } = props
+  /* const data = [
     { value: 14, time: 1503617297689 },
     { value: 25, time: 1503616962277 },
     { value: 55, time: 1503616882654 },
     { value: 102, time: 1503613184594 },
     { value: 255, time: 1503611308914 },
-  ];
+  ]; */
 
   return (
     <div>

@@ -1,22 +1,22 @@
 export interface Confirmed {
-  data: String,
-  healthCareDistrict: String,
-  id: String,
-  infectionSource?: String,
-  infectionSourceCountry?: String
+  date: string,
+  healthCareDistrict: string,
+  id: string,
+  infectionSource?: string,
+  infectionSourceCountry?: string
 }
 
 export interface Deaths {
-  area: String,
-  date: String,
-  healthCareDistrict: String,
-  id: String
+  area: string,
+  date: string,
+  healthCareDistrict: string,
+  id: string
 }
 
 export interface Recovered {
-  date: String,
-  healthCareDistrict: String,
-  id: String
+  date: string,
+  healthCareDistrict: string,
+  id: string
 }
 
 export interface FinnishCoronaData {
