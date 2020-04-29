@@ -11,19 +11,16 @@ export type State = {
 };
 
 const initialState: State = {
-  finnishCoronaDataPending: false,
+  finnishCoronaDataPending: true,
   finnishCoronaData: {
     confirmed: [],
     deaths: [],
     recovered: []
   },
-  hcdTestDataPending: false,
+  hcdTestDataPending: true,
   hcdTestData: {},
   error: false
 }
-
-// @TODO: add a return type to 
-// const dataReducer = (state = initialState, action: DataActionTypes): TYPE_HERE[] => {
 
 const dataReducer = (state = initialState, action: DataActionTypes) => {
   switch (action.type) {
@@ -68,8 +65,8 @@ const dataReducer = (state = initialState, action: DataActionTypes) => {
 
 export { dataReducer }
 
-export const getFinnishCoronaData = (state: { finnishCoronaData: FinnishCoronaData; }) => state.finnishCoronaData;
-export const getHcdTestData = (state: { hcdTestData: HcdTestData; }) => state.hcdTestData;
-export const getFinnishCoronaDataPending = (state: { finnishCoronaDataPending: Boolean; }) => state.finnishCoronaDataPending;
-export const getHcdTestDataPending = (state: { finnishCoronaDataPending: Boolean; }) => state.finnishCoronaDataPending;
-export const getDataError = (state: { error: Boolean; }) => state.error;
+/* export const getFinnishCoronaData = (state: State) => state.finnishCoronaData;
+export const getHcdTestData = (state: State) => state.hcdTestData;
+export const getFinnishCoronaDataPending = (state: State) => state.finnishCoronaDataPending;
+export const getHcdTestDataPending = (state: State) => state.finnishCoronaDataPending;
+export const getDataError = (state: State) => state.error; */

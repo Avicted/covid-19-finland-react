@@ -9,6 +9,7 @@ import {
 } from "../../models/actions";
 import { HcdTestData } from "../../models/HcdTestData";
 import { FinnishCoronaData } from "../../models/FinnishCoronaData";
+import { Dispatch } from "react";
 
 
 export const fetchDataPending = (): AppActions => ({
@@ -40,7 +41,7 @@ export const fetchHcdTestDataError = (error: Boolean): AppActions => ({
 })
 
 export function fetchFinnishCoronaData() {
-  return async (dispatch: any) => {
+  return async (dispatch: Dispatch<AppActions>) => {
     dispatch(fetchDataPending());
     await fetch('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
       .then(res => res.json())
@@ -59,7 +60,7 @@ export function fetchFinnishCoronaData() {
 }
 
 export function fetchHcdTestData() {
-  return async (dispatch: any) => {
+  return async (dispatch: Dispatch<AppActions>) => {
     dispatch(fetchHcdTestDataPending());
     await fetch('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/hcdTestData')
       .then(res => res.json())

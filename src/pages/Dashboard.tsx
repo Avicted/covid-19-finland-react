@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Dispatch } from 'react'
 import { Container, Grid, Box, withStyles, Theme, StyleRules, createStyles, WithStyles } from '@material-ui/core'
 import KPICard from '../components/KPICard'
 import purple from '@material-ui/core/colors/purple';
@@ -9,24 +9,28 @@ import amber from '@material-ui/core/colors/amber';
 import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
 import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
-import { connect } from 'react-redux';
+import { connect, ReactReduxContext } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
-import { getHcdTestData, getDataError, getFinnishCoronaData, getHcdTestDataPending, getFinnishCoronaDataPending } from '../store/reducers/reducer';
+// import { getHcdTestData, getDataError, getFinnishCoronaData, getHcdTestDataPending, getFinnishCoronaDataPending } from '../store/reducers/reducer';
+import { State } from '../store/reducers/reducer';
+import { AppActions } from '../models/actions';
+import { bindActionCreators, compose } from 'redux';
+import { HcdTestData } from '../models/HcdTestData';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
     container: {
       marginTop: 20
     },
-})
+  })
 
 interface IMyProps { }
 interface IMyState { }
 
 type Props = ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps>& 
-  IMyProps &
-  WithStyles<typeof styles>
+  ReturnType<typeof mapDispatchToProps> &
+  WithStyles<typeof styles> &
+  IMyProps
 
 
 class Dashboard extends Component<Props, IMyState> {
@@ -43,34 +47,30 @@ class Dashboard extends Component<Props, IMyState> {
 
   shouldComponentRender() {
     const { hcdTestDataPending, finnishCoronaDataPending } = this.props;
-    if (hcdTestDataPending === true && finnishCoronaDataPending === true) return false;
+    if (hcdTestDataPending === true || finnishCoronaDataPending === true) return false;
     return true;
   }
 
   render() {
-    const { classes, error, hcdTestDataPending } = this.props;
+    const { classes, hcdTestData, finnishCoronaData, error } = this.props;
 
     if (!this.shouldComponentRender()) {
       return (<div>Loading...</div>)
     }
 
     return (
-      <Container className={classes.container} maxWidth="xl">
+      <Container className={classes.container} maxWidth="lg">
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Box fontWeight="fontWeightLight" fontSize="h4.fontSize">
               Finland COVID-19 data
-              <br></br>
-              <span>error: { error }</span>
-              <br></br>
-              <span>hcdTestDataPending: { hcdTestDataPending }</span>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Confirmed cases" data="123" color={purple[200]} />
+            <KPICard title="Confirmed cases" data={hcdTestData["Kaikki sairaanhoitopiirit"].infected} color={purple[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Recovered cases" data="10" color={green[200]} />
+            <KPICard title="Recovered cases" data="0" color={green[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
             <KPICard title="Deaths" data="177" color={red[300]} />
@@ -82,7 +82,7 @@ class Dashboard extends Component<Props, IMyState> {
             <KPICard title="% of population tested" data="1.34 %" color={amber[300]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Tested cases" data="74557" color={pink[400]} />
+            <KPICard title="Tested cases" data={hcdTestData["Kaikki sairaanhoitopiirit"].tested} color={pink[400]} />
           </Grid>
 
           <Grid item xs={12} lg={6}>
@@ -98,19 +98,24 @@ class Dashboard extends Component<Props, IMyState> {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  hcdTestDataPending: getHcdTestDataPending(state),
-  hcdTestData: getHcdTestData(state),
-  finnishCoronaData: getFinnishCoronaData(state),
-  finnishCoronaDataPending: getFinnishCoronaDataPending(state),
-  error: getDataError(state),
-})
-
-const mapDispatchToProps = (dispatch: any) => {
+const mapStateToProps = (state: any) => {
   return {
-    fetchHcdTestData: () => dispatch(fetchHcdTestData()),
-    fetchFinnishCoronaData: () => dispatch(fetchFinnishCoronaData()),
+    hcdTestDataPending: state.data.hcdTestDataPending,
+    hcdTestData: state.data.hcdTestData,
+    finnishCoronaData: state.data.finnishCoronaData,
+    finnishCoronaDataPending: state.data.finnishCoronaDataPending,
+    error: state.data.error
   }
-}
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Dashboard))
+const mapDispatchToProps = (dispatch: any) =>
+  bindActionCreators(
+    {
+      fetchHcdTestData: fetchHcdTestData,
+      fetchFinnishCoronaData: fetchFinnishCoronaData
+    },
+    dispatch
+  );
+
+
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Dashboard));
