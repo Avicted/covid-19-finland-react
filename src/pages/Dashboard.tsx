@@ -1,4 +1,4 @@
-import React, { Component, Dispatch } from 'react'
+import React, { Component } from 'react'
 import { Container, Grid, Box, withStyles, Theme, StyleRules, createStyles, WithStyles, CircularProgress } from '@material-ui/core'
 import KPICard from '../components/KPICard'
 import purple from '@material-ui/core/colors/purple';
@@ -9,19 +9,15 @@ import amber from '@material-ui/core/colors/amber';
 import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
 import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
-import { connect, ReactReduxContext } from 'react-redux';
+import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
-// import { getHcdTestData, getDataError, getFinnishCoronaData, getHcdTestDataPending, getFinnishCoronaDataPending } from '../store/reducers/reducer';
-import { State } from '../store/reducers/reducer';
-import { AppActions } from '../models/actions';
-import { bindActionCreators, compose } from 'redux';
-import { HcdTestData } from '../models/HcdTestData';
+import { bindActionCreators } from 'redux';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
     loader: {
-      display: 'flex', 
-      justifyContent: 'center', 
+      display: 'flex',
+      justifyContent: 'center',
       marginTop: '50vh'
     },
     container: {
@@ -51,13 +47,14 @@ class Dashboard extends Component<Props, IMyState> {
   }
 
   shouldComponentRender() {
-    const { hcdTestDataPending, finnishCoronaDataPending } = this.props;
-    if (hcdTestDataPending === true || finnishCoronaDataPending === true) return false;
+    const { hcdTestDataPending, finnishCoronaDataPending, hcdTestData, finnishCoronaData } = this.props
+    if (hcdTestDataPending === true || finnishCoronaDataPending === true) return false
+    else if (Object.keys(hcdTestData).length === 0 || finnishCoronaData.confirmed.length === 0) return false
     return true;
   }
 
   render() {
-    const { classes, hcdTestData, finnishCoronaData, error } = this.props;
+    const { classes, hcdTestData } = this.props;
 
     if (!this.shouldComponentRender()) {
       return (

@@ -11,13 +11,13 @@ export type State = {
 };
 
 const initialState: State = {
-  finnishCoronaDataPending: true,
+  finnishCoronaDataPending: false,
   finnishCoronaData: {
     confirmed: [],
     deaths: [],
     recovered: []
   },
-  hcdTestDataPending: true,
+  hcdTestDataPending: false,
   hcdTestData: {},
   error: false
 }
