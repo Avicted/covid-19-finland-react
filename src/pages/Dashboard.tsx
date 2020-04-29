@@ -1,5 +1,5 @@
 import React, { Component, Dispatch } from 'react'
-import { Container, Grid, Box, withStyles, Theme, StyleRules, createStyles, WithStyles } from '@material-ui/core'
+import { Container, Grid, Box, withStyles, Theme, StyleRules, createStyles, WithStyles, CircularProgress } from '@material-ui/core'
 import KPICard from '../components/KPICard'
 import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
@@ -19,6 +19,11 @@ import { HcdTestData } from '../models/HcdTestData';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
+    loader: {
+      display: 'flex', 
+      justifyContent: 'center', 
+      marginTop: '50vh'
+    },
     container: {
       marginTop: 20
     },
@@ -55,7 +60,11 @@ class Dashboard extends Component<Props, IMyState> {
     const { classes, hcdTestData, finnishCoronaData, error } = this.props;
 
     if (!this.shouldComponentRender()) {
-      return (<div>Loading...</div>)
+      return (
+        <div className={classes.loader}>
+          <CircularProgress />
+        </div>
+      )
     }
 
     return (
