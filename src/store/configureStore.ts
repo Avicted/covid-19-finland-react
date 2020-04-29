@@ -11,7 +11,7 @@ const middlewares: Middleware[] = [
 ];
 
 const rootReducer = combineReducers({
-  data: dataReducer,
+  finland: dataReducer,
 })
 
 export type AppState = ReturnType<typeof rootReducer>

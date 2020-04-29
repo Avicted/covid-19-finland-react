@@ -17,7 +17,7 @@ const useStyles = makeStyles({
   }
 });
 
-function KPICard(props: {title: String, data: String, color: String}) {
+function KPICard(props: {title: string, data: string | number, color: string}) {
   const classes = useStyles();
   const { title, data, color } = props;
 

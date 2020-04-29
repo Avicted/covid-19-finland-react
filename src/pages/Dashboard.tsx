@@ -12,6 +12,8 @@ import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
+import { getHcdTestData, State, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested } from '../store/reducers/reducer';
+import { AppState } from '../store/configureStore';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -41,7 +43,6 @@ class Dashboard extends Component<Props, IMyState> {
   }
 
   componentDidMount() {
-    console.log(`Dashboard componentDidMount`)
     this.props.fetchHcdTestData()
     this.props.fetchFinnishCoronaData()
   }
@@ -54,7 +55,7 @@ class Dashboard extends Component<Props, IMyState> {
   }
 
   render() {
-    const { classes, hcdTestData } = this.props;
+    const { classes, hcdTestData, totalInfected, percentageOfPopulationTested, totalTested } = this.props;
 
     if (!this.shouldComponentRender()) {
       return (
@@ -68,27 +69,27 @@ class Dashboard extends Component<Props, IMyState> {
       <Container className={classes.container} maxWidth="lg">
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Box fontWeight="fontWeightLight" fontSize="h4.fontSize">
+            <Box fontWeight="fontWeightLight" fontSize="h5.fontSize">
               Finland COVID-19 data
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Confirmed cases" data={hcdTestData["Kaikki sairaanhoitopiirit"].infected} color={purple[200]} />
+            <KPICard title="Confirmed cases" data={totalInfected} color={purple[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
             <KPICard title="Recovered cases" data="0" color={green[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Deaths" data="177" color={red[300]} />
+            <KPICard title="Deaths" data="0" color={red[300]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Infections change today" data="-16" color={grey[200]} />
+            <KPICard title="Infections change today" data="0" color={grey[200]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="% of population tested" data="1.34 %" color={amber[300]} />
+            <KPICard title="% of population tested" data={percentageOfPopulationTested + ' %'} color={amber[300]} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={2}>
-            <KPICard title="Tested cases" data={hcdTestData["Kaikki sairaanhoitopiirit"].tested} color={pink[400]} />
+            <KPICard title="Tested cases" data={totalTested} color={pink[400]} />
           </Grid>
 
           <Grid item xs={12} lg={6}>
@@ -104,13 +105,19 @@ class Dashboard extends Component<Props, IMyState> {
   }
 }
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: AppState) => {
   return {
-    hcdTestDataPending: state.data.hcdTestDataPending,
-    hcdTestData: state.data.hcdTestData,
-    finnishCoronaData: state.data.finnishCoronaData,
-    finnishCoronaDataPending: state.data.finnishCoronaDataPending,
-    error: state.data.error
+    hcdTestDataPending: state.finland.hcdTestDataPending,
+    // hcdTestData: state.finland.hcdTestData,
+    hcdTestData: getHcdTestData(state.finland),
+    finnishCoronaData: state.finland.finnishCoronaData,
+    finnishCoronaDataPending: state.finland.finnishCoronaDataPending,
+    error: state.finland.error,
+
+    totalInfected: getTotalInfected(state.finland),
+    totalPopulation: getTotalPopulation(state.finland),
+    totalTested: getTotalTested(state.finland),
+    percentageOfPopulationTested: getPercentageOfPopulationTested(state.finland),
   }
 };
 
