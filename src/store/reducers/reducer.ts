@@ -106,5 +106,41 @@ export const getConfirmedChartData = (state: State) => {
 
   let chartDataArray: { time: number, value: number }[] = [];
   chartDataMap.forEach(element => chartDataArray.push(element))
-  return chartDataArray;
+  
+  const sortedChartDataArray = chartDataArray.sort(function(x, y){
+      return x.time - y.time;
+  });
+
+  return sortedChartDataArray;
+}
+
+export const getDeathsChartData = (state: State) => {
+  const deaths = getFinnishCoronaData(state).deaths
+
+  if (deaths.length <= 0) {
+    return null;
+  }
+
+  // @TODO: research typescript Record
+  let chartDataMap: Map<any, any> = new Map()
+
+  for (let i = 0; i < deaths.length; i++) {
+    const element = deaths[i];
+    const timestamp = new Date(element.date).getTime()
+
+    if (chartDataMap.has(timestamp)) {
+      chartDataMap.get(timestamp).value++
+    } else {
+      chartDataMap.set(timestamp, { value: 1, time: timestamp })
+    }
+  }
+
+  let chartDataArray: { time: number, value: number }[] = [];
+  chartDataMap.forEach(element => chartDataArray.push(element))
+
+  const sortedChartDataArray = chartDataArray.sort(function(x, y){
+      return x.time - y.time;
+  });
+
+  return sortedChartDataArray;
 }

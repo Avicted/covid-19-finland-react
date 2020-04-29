@@ -12,7 +12,7 @@ import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, State, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData } from '../store/reducers/reducer';
+import { getHcdTestData, State, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData } from '../store/reducers/reducer';
 import { AppState } from '../store/configureStore';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
@@ -55,7 +55,7 @@ class Dashboard extends Component<Props, IMyState> {
   }
 
   render() {
-    const { classes, totalInfected, percentageOfPopulationTested, totalTested, confirmedChartData } = this.props;
+    const { classes, totalInfected, percentageOfPopulationTested, totalTested, confirmedChartData, deathsChartData } = this.props;
 
     if (!this.shouldComponentRender()) {
       return (
@@ -93,7 +93,7 @@ class Dashboard extends Component<Props, IMyState> {
           </Grid>
 
           <Grid item xs={12} lg={6}>
-            <CasesByDayChart data={confirmedChartData}/>
+            <CasesByDayChart confirmed={confirmedChartData} deaths={deathsChartData} />
           </Grid>
           <Grid item xs={12} lg={6}>
             <CasesByDayChartCumulative />
@@ -120,6 +120,7 @@ const mapStateToProps = (state: AppState) => {
     percentageOfPopulationTested: getPercentageOfPopulationTested(state.finland),
 
     confirmedChartData: getConfirmedChartData(state.finland),
+    deathsChartData: getDeathsChartData(state.finland),
   }
 };
 
