@@ -64,16 +64,100 @@ export const dataReducer = (state = initialState, action: DataActionTypes) => {
   }
 }
 
+// @TODO: all the reducer data parsing results should be stored inside the state !!!!!!!!!
 export const getFinnishCoronaData = (state: State) => state.finnishCoronaData;
 export const getHcdTestData = (state: State) => state.hcdTestData;
 export const getFinnishCoronaDataPending = (state: State) => state.finnishCoronaDataPending;
 export const getHcdTestDataPending = (state: State) => state.finnishCoronaDataPending;
 export const getDataError = (state: State) => state.error;
 
+export const getTotalRecovered = (state: State): number => state.finnishCoronaData?.recovered.length;
+export const getTotalDeaths = (state: State): number => state.finnishCoronaData?.deaths.length;
+
 export const getTotalInfected = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.infected;
 export const getTotalPopulation = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.population;
 export const getTotalTested = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.tested;
 
+
+export const getChangeToday = (state: State): string => {
+  const confirmedCases = getFinnishCoronaData(state).confirmed
+  const confirmedCasesCount = confirmedCases.length;
+
+  if (confirmedCasesCount <= 0) {
+    return '';
+  }
+
+  const confirmedCasesByDay: any = [];
+
+  const generatedDates: [number, number][] = [];
+  const todaysDate = new Date().toISOString();
+  let oldestDate = new Date().toISOString();
+
+  for (let i = 0; i < confirmedCasesCount; i++) {
+    const datetime = confirmedCases[i].date;
+    const date = new Date(datetime).toISOString().substr(0, 10);
+    const milliseconds = new Date(date).getTime();
+
+    if (Date.parse(datetime) < Date.parse(oldestDate)) {
+      oldestDate = datetime;
+    }
+
+    // Is the current date already stored? If so, increment the case count
+    const processedDatesCount = confirmedCasesByDay.length;
+    let dateAlreadyProcessed = false;
+
+    for (let i = 0; i < processedDatesCount; i++) {
+      const currentMilliseconds = confirmedCasesByDay[i][0];
+
+      if (currentMilliseconds === milliseconds) {
+        confirmedCasesByDay[i][1] = confirmedCasesByDay[i][1] + 1;
+        dateAlreadyProcessed = true;
+        break;
+      }
+    }
+
+    // If not store it
+    if (!dateAlreadyProcessed) {
+      confirmedCasesByDay.push([milliseconds, 1]);
+    }
+  }
+
+  // Generate missing dates
+  const today = moment(todaysDate).format("YYYY-MM-DD");
+  const oldest = moment(oldestDate).format("YYYY-MM-DD");
+
+  for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, "days")) {
+    const currentMilliseconds = new Date(m.format("YYYY-MM-DD")).getTime();
+    generatedDates.push([currentMilliseconds, 0]);
+  }
+
+  // Assign the data to the generated dates
+  for (let i = 0; i < generatedDates.length; i++) {
+    for (let j = 0; j < confirmedCasesByDay.length; j++) {
+      const currentCaseDate = confirmedCasesByDay[j][0];
+      if (currentCaseDate === generatedDates[i][0]) {
+        generatedDates[i][1] =
+          generatedDates[i][1] + confirmedCasesByDay[j][1];
+      }
+    }
+  }
+
+  // Calculate the increase in cases today compared to yesterday
+  const casesToday = generatedDates[generatedDates.length - 1][1];
+  const casesYesterday = generatedDates[generatedDates.length - 2][1];
+  const total = casesToday - casesYesterday;
+  let increaseToday: string = '';
+
+  if (total > 0) {
+    increaseToday = `+ ${casesToday - casesYesterday}`;
+  } else if (total > 0) {
+    increaseToday = `- ${casesToday - casesYesterday}`;
+  } else {
+    increaseToday = `${casesToday - casesYesterday}`;
+  }
+
+  return increaseToday;
+}
 
 export const getPercentageOfPopulationTested = (state: State) => {
   if (getTotalPopulation(state) > 0 && getTotalTested(state) > 0) {

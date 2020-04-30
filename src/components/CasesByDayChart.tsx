@@ -3,6 +3,11 @@ import { Card, makeStyles, Typography, CardContent } from '@material-ui/core'
 import Chart from 'react-apexcharts';
 
 const useStyles = makeStyles({
+  cardcontent: {
+    "&:last-child": {
+      paddingBottom: 12
+    }
+  },
   card: {
     minHeight: 300,
   },
@@ -11,7 +16,7 @@ const useStyles = makeStyles({
     marginBottom: 0
   },
   chart: {
-
+    
   }
 });
 
@@ -112,7 +117,7 @@ function CasesByDayChart(props: { confirmed: any, recovered: any, deaths: any,  
   return (
     <div>
       <Card className={classes.card}>
-        <CardContent>
+        <CardContent className={classes.cardcontent}>
           <Typography className={classes.title} gutterBottom>
             Cases by day
           </Typography>

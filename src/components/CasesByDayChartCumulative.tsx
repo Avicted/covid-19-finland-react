@@ -2,6 +2,11 @@ import React from 'react'
 import { Card, makeStyles, Typography, CardContent } from '@material-ui/core'
 
 const useStyles = makeStyles({
+  cardcontent: {
+    "&:last-child": {
+      paddingBottom: 12
+    }
+  },
   card: {
     minHeight: 400,
   },
@@ -17,7 +22,7 @@ function CasesByDayChartCumulative() {
   return (
     <div>
       <Card className={classes.card}>
-        <CardContent>
+        <CardContent className={classes.cardcontent}>
           <Typography className={classes.title} gutterBottom>
             Cases by day (cumulative)
           </Typography>
