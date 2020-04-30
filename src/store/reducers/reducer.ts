@@ -1,6 +1,7 @@
 import { HcdTestData } from '../../models/HcdTestData';
 import { DataActionTypes } from '../../models/actions';
 import { FinnishCoronaData } from '../../models/FinnishCoronaData';
+import moment from 'moment';
 
 export type State = {
   readonly finnishCoronaDataPending: Boolean;
@@ -90,28 +91,8 @@ export const getConfirmedChartData = (state: State) => {
     return null;
   }
 
-  // @TODO: research typescript Record
-  let chartDataMap: Map<any, any> = new Map()
-
-  for (let i = 0; i < confirmed.length; i++) {
-    const element = confirmed[i];
-    const timestamp = new Date(element.date).getTime()
-
-    if (chartDataMap.has(timestamp)) {
-      chartDataMap.get(timestamp).value++
-    } else {
-      chartDataMap.set(timestamp, { value: 1, time: timestamp })
-    }
-  }
-
-  let chartDataArray: { time: number, value: number }[] = [];
-  chartDataMap.forEach(element => chartDataArray.push(element))
-  
-  const sortedChartDataArray = chartDataArray.sort(function(x, y){
-      return x.time - y.time;
-  });
-
-  return sortedChartDataArray;
+  const data = generateMissingDates(state, confirmed)
+  return data;
 }
 
 export const getDeathsChartData = (state: State) => {
@@ -121,26 +102,90 @@ export const getDeathsChartData = (state: State) => {
     return null;
   }
 
-  // @TODO: research typescript Record
-  let chartDataMap: Map<any, any> = new Map()
+  const data = generateMissingDates(state, deaths)
+  return data;
+}
 
-  for (let i = 0; i < deaths.length; i++) {
-    const element = deaths[i];
-    const timestamp = new Date(element.date).getTime()
+export const getRecoveredChartData = (state: State) => {
+  const recovered = getFinnishCoronaData(state).recovered
 
-    if (chartDataMap.has(timestamp)) {
-      chartDataMap.get(timestamp).value++
-    } else {
-      chartDataMap.set(timestamp, { value: 1, time: timestamp })
+  if (recovered.length <= 0) {
+    return null;
+  }
+
+  const data = generateMissingDates(state, recovered)
+  return data;
+}
+
+function generateMissingDates(state: State, data: any): [number, number][] {
+  const confirmed = getFinnishCoronaData(state).confirmed
+  const confirmedCasesCount = data.length;
+
+  const cases = data;
+  const casesCount = confirmedCasesCount;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const casesByDay: any = [];
+
+  const generatedDates: [number, number][] = [];
+  const todaysDate = new Date().toISOString();
+  let oldestDate = new Date().toISOString();
+
+  for (let i = 0; i < confirmedCasesCount; i++) {
+    const datetime = confirmed[i].date;
+    const date = new Date(datetime).toISOString().substr(0, 10);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const milliseconds = new Date(date).getTime();
+
+    if (Date.parse(datetime) < Date.parse(oldestDate)) {
+      oldestDate = datetime;
     }
   }
 
-  let chartDataArray: { time: number, value: number }[] = [];
-  chartDataMap.forEach(element => chartDataArray.push(element))
+  for (let i = 0; i < casesCount; i++) {
+    const datetime = cases[i].date;
+    const date = new Date(datetime).toISOString().substr(0, 10);
+    const milliseconds = new Date(date).getTime();
 
-  const sortedChartDataArray = chartDataArray.sort(function(x, y){
-      return x.time - y.time;
-  });
+    // Is the current date already stored? If so, increment the case count
+    const processedDatesCount = casesByDay.length;
+    let dateAlreadyProcessed = false;
 
-  return sortedChartDataArray;
+    for (let i = 0; i < processedDatesCount; i++) {
+      const currentMilliseconds = casesByDay[i][0];
+
+      if (currentMilliseconds === milliseconds) {
+        casesByDay[i][1] = casesByDay[i][1] + 1;
+        dateAlreadyProcessed = true;
+        break;
+      }
+    }
+
+    // If not store it
+    if (!dateAlreadyProcessed) {
+      casesByDay.push([milliseconds, 1]);
+    }
+  }
+
+  // Generate missing dates
+  const today = moment(todaysDate).format("YYYY-MM-DD");
+  const oldest = moment(oldestDate).format("YYYY-MM-DD");
+
+  for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, "days")) {
+    const currentMilliseconds = new Date(
+      m.format("YYYY-MM-DD")
+    ).getTime();
+    generatedDates.push([currentMilliseconds, 0]);
+  }
+
+  // Assign the data to the generated dates
+  for (let i = 0; i < generatedDates.length; i++) {
+    for (let j = 0; j < casesByDay.length; j++) {
+      const currentCaseDate = casesByDay[j][0];
+      if (currentCaseDate === generatedDates[i][0]) {
+        generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1];
+      }
+    }
+  }
+
+  return generatedDates;
 }

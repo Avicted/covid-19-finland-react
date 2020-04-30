@@ -1,38 +1,113 @@
 import React from 'react'
 import { Card, makeStyles, Typography, CardContent } from '@material-ui/core'
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
-import moment from 'moment';
+import Chart from 'react-apexcharts';
 
 const useStyles = makeStyles({
   card: {
-    minHeight: 400,
+    minHeight: 300,
   },
   title: {
     fontSize: 14,
     marginBottom: 0
+  },
+  chart: {
+
   }
 });
 
-function CasesByDayChart(props: { confirmed: any, deaths: any }) {
+function CasesByDayChart(props: { confirmed: any, recovered: any, deaths: any,  }) {
   const classes = useStyles();
-  const { confirmed, deaths } = props
+  const { confirmed, recovered, deaths } = props
+
   const series = [
     {
       name: 'New infections',
       data: confirmed
     },
     {
+      name: 'Recovered',
+      data: recovered
+    },
+    {
       name: 'Deaths',
       data: deaths
-    }
+    },
   ]
-  /* const data = [
-    { value: 14, time: 1503617297689 },
-    { value: 25, time: 1503616962277 },
-    { value: 55, time: 1503616882654 },
-    { value: 102, time: 1503613184594 },
-    { value: 255, time: 1503611308914 },
-  ]; */
+
+  const options = {
+    theme: {
+      mode: "dark"
+    },
+    colors: ["#ce93d8", "#81c784", "#e57373", "#ffd54f"],
+    chart: {
+      id: "cases-by-day",
+      // group: "covid-cases",
+      fontFamily: "Roboto",
+      stacked: false,
+      animations: {
+        enabled: false
+      },
+      toolbar: {
+        show: true,
+        tools: {
+          download: false,
+          selection: true,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+          reset: true
+        }
+      }
+    },
+    xaxis: {
+      type: "datetime",
+      crosshairs: {
+        show: true,
+        width: 1,
+        position: "back",
+        opacity: 0.9,
+        stroke: {
+          color: "#b6b6b6",
+          width: 1,
+          dashArray: 3
+        }
+      }
+    },
+    yaxis: {
+      labels: {
+        minWidth: 40
+      }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "90%"
+      }
+    },
+    stroke: {
+      show: true,
+      curve: "straight",
+      colors: undefined,
+      width: [2, 2, 2, 2],
+      dashArray: [0, 0, 0, 0]
+    },
+    dataLabels: {
+      enabled: false
+    },
+    tooltip: {
+      shared: true,
+      followCursor: true
+    },
+    legend: {
+      show: true,
+      position: "bottom"
+    },
+    grid: {
+      borderColor: "#525252",
+      strokeDashArray: 7
+    }
+  }
 
   return (
     <div>
@@ -41,26 +116,9 @@ function CasesByDayChart(props: { confirmed: any, deaths: any }) {
           <Typography className={classes.title} gutterBottom>
             Cases by day
           </Typography>
-          <ResponsiveContainer width='95%' height={375} >
-            {/* <LineChart height={375} data={series}> */}
-            <LineChart height={375}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis
-                dataKey='time'
-                domain={['auto', 'auto']}
-                name='Time'
-                tickFormatter={(unixTime) => moment(unixTime).format('HH:mm Do')}
-                type='number'
-              />
-              <YAxis dataKey='value' name='Value' tickCount={5} />
-              <Tooltip />
-              <Legend />
-              {series.map(s => (
-                <Line dataKey="value" data={s.data} name={s.name} key={s.name} />
-              ))}
-              {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
-            </LineChart>
-          </ResponsiveContainer>
+          <div className={classes.chart}>
+            <Chart options={options} series={series} type="area" width='100%' height={300} />
+          </div>
         </CardContent>
       </Card>
     </div>

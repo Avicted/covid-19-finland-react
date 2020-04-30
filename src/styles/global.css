@@ -1,0 +1,16 @@
+.apexcharts-canvas.apexcharts-theme-dark {
+	background: transparent !important;
+}
+
+.apexcharts-canvas.apexcharts-theme-dark .apexcharts-tooltip {
+	background-color: #0c111f !important;
+	box-shadow: none !important;
+}
+
+.apexcharts-canvas.apexcharts-theme-dark .apexcharts-tooltip .apexcharts-tooltip-series-group {
+	padding-bottom: 5px;
+}
+
+.apexcharts-canvas.apexcharts-theme-dark .apexcharts-tooltip .apexcharts-tooltip-series-group .apexcharts-tooltip-text {
+	line-height: 12px;
+}

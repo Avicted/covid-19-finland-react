@@ -1,6 +1,6 @@
 import React from 'react';
-import './App.css';
-import theme from './theme';
+import './styles/global.css';
+import theme from './styles/theme';
 import { ThemeProvider, CssBaseline } from '@material-ui/core';
 import Dashboard from './pages/Dashboard';
 
