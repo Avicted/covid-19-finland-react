@@ -201,7 +201,40 @@ export const getRecoveredChartData = (state: State) => {
   return data;
 }
 
-function generateMissingDates(state: State, data: any): [number, number][] {
+export const getConfirmedChartDataCumulative = (state: State) => {
+  const confirmed = getFinnishCoronaData(state).confirmed
+
+  if (confirmed.length <= 0) {
+    return null;
+  }
+
+  const data = generateMissingDates(state, confirmed, true)
+  return data;
+}
+
+export const getDeathsChartDataCumulative = (state: State) => {
+  const deaths = getFinnishCoronaData(state).deaths
+
+  if (deaths.length <= 0) {
+    return null;
+  }
+
+  const data = generateMissingDates(state, deaths, true)
+  return data;
+}
+
+export const getRecoveredChartDataCumulative = (state: State) => {
+  const recovered = getFinnishCoronaData(state).recovered
+
+  if (recovered.length <= 0) {
+    return null;
+  }
+
+  const data = generateMissingDates(state, recovered, true)
+  return data;
+}
+
+function generateMissingDates(state: State, data: any, cumulative: boolean = false): [number, number][] {
   const confirmed = getFinnishCoronaData(state).confirmed
   const confirmedCasesCount = data.length;
 
@@ -263,11 +296,27 @@ function generateMissingDates(state: State, data: any): [number, number][] {
 
   // Assign the data to the generated dates
   for (let i = 0; i < generatedDates.length; i++) {
+    let caseFoundOnDate = false;
+
     for (let j = 0; j < casesByDay.length; j++) {
       const currentCaseDate = casesByDay[j][0];
       if (currentCaseDate === generatedDates[i][0]) {
-        generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1];
+        caseFoundOnDate = true;
+
+        if (cumulative) {
+          if (i > 0) {
+            generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1] + casesByDay[j][1];
+          } else {
+            generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1];
+          }
+        } else {
+          generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1];
+        }
       }
+    }
+
+    if (i > 0 && !caseFoundOnDate) {
+      generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1];
     }
   }
 

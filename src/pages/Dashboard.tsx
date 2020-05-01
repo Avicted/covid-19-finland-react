@@ -12,7 +12,7 @@ import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday } from '../store/reducers/reducer';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative } from '../store/reducers/reducer';
 import { AppState } from '../store/configureStore';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
@@ -66,7 +66,20 @@ class Dashboard extends Component<Props, IMyState> {
     }
 
     // fetch the reducer getters after the initial data has loaded
-    const { totalInfected, percentageOfPopulationTested, totalTested, confirmedChartData, deathsChartData, recoveredChartData, totalRecovered, totalDeaths, changeToday } = this.props;
+    const { 
+      totalInfected, 
+      percentageOfPopulationTested, 
+      totalTested, 
+      confirmedChartData, 
+      deathsChartData, 
+      recoveredChartData, 
+      totalRecovered, 
+      totalDeaths, 
+      changeToday, 
+      confirmedChartDataCumulative, 
+      deathsChartDataCumulative,
+      recoveredChartDataCumulative 
+    } = this.props;
     
     return (
       <Container className={classes.container} maxWidth="lg">
@@ -99,7 +112,7 @@ class Dashboard extends Component<Props, IMyState> {
             <CasesByDayChart confirmed={confirmedChartData} recovered={recoveredChartData} deaths={deathsChartData} />
           </Grid>
           <Grid item xs={12} lg={6}>
-            <CasesByDayChartCumulative />
+            <CasesByDayChartCumulative confirmed={confirmedChartDataCumulative} recovered={recoveredChartDataCumulative} deaths={deathsChartDataCumulative} />
           </Grid>
 
         </Grid>
@@ -129,6 +142,10 @@ const mapStateToProps = (state: AppState) => {
     confirmedChartData: getConfirmedChartData(state.finland),
     deathsChartData: getDeathsChartData(state.finland),
     recoveredChartData: getRecoveredChartData(state.finland),
+    
+    confirmedChartDataCumulative: getConfirmedChartDataCumulative(state.finland),
+    deathsChartDataCumulative: getDeathsChartDataCumulative(state.finland),
+    recoveredChartDataCumulative: getRecoveredChartDataCumulative(state.finland),
 
     changeToday: getChangeToday(state.finland),
   }
