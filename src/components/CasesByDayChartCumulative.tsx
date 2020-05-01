@@ -39,7 +39,7 @@ interface IState {
 
 type Props = WithStyles<typeof styles> & IProps
 
-class CasesByDayChartCumulative extends Component<Props, IState> {
+class CasesByDayChartCumulativeChart extends Component<Props, IState> {
   state = {
     anchorEl: null,
     options: {
@@ -234,4 +234,4 @@ class CasesByDayChartCumulative extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(CasesByDayChartCumulative)
+export default withStyles(styles)(CasesByDayChartCumulativeChart)

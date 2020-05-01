@@ -38,7 +38,7 @@ interface IState {
 
 type Props = WithStyles<typeof styles> & IProps
 
-class CasesByHealthCareDistrict extends Component<Props, IState> {
+class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
   state = {
     anchorEl: null,
     options: {
@@ -81,6 +81,14 @@ class CasesByHealthCareDistrict extends Component<Props, IState> {
         style: {
           fontSize: '10px'
         },
+        formatter: function(value: number) {
+          if (value > 999) {
+            const result = (value / 1000).toFixed(0);
+            return `${result}k`;
+          } else {
+            return value;
+          }
+        }
       },
       legend: {
         show: true,
@@ -95,6 +103,19 @@ class CasesByHealthCareDistrict extends Component<Props, IState> {
         categories: this.props.labels,
         labels: {
           show: false
+        }
+      },
+      yaxis: {
+        labels: {
+          minWidth: 40,
+          formatter: function(value: number) {
+            if (value > 999) {
+              const result = (value / 1000).toFixed(0);
+              return `${result}k`;
+            } else {
+              return value;
+            }
+          }
         }
       },
       plotOptions: {
@@ -138,7 +159,7 @@ class CasesByHealthCareDistrict extends Component<Props, IState> {
         <Card className={classes.card}>
           <CardContent className={classes.cardcontent}>
             <Typography className={classes.title} gutterBottom>
-              Infections by health care district
+              Tests by health care district
             </Typography>
             <div className={classes.chart}>
               <ReactApexChart options={this.state.options} series={this.state.series} type={this.state.options.chart.type as any} width='100%' height={400} />
@@ -150,4 +171,4 @@ class CasesByHealthCareDistrict extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(CasesByHealthCareDistrict)
+export default withStyles(styles)(TestedPerHealthCareDistrictChart)

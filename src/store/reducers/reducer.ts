@@ -384,6 +384,36 @@ export const getInfectionsByHealthCareDistrictChartData = (state: State) => {
   }
 }
 
+export const getTestsPerHealthCareDistrictChartData = (state: State) => {
+  const healthCareDistrictData = getHcdTestData(state)
+
+  if (healthCareDistrictData == null) {
+    return null
+  }
+
+  let generatedLabels: string[] = []
+  let generatedSeries: any[] = []
+  for (const district in healthCareDistrictData) {
+    if (district === "Kaikki sairaanhoitopiirit") {
+      continue;
+    }
+
+    const districtName = district;
+    const districtTestCases = healthCareDistrictData[district].tested;
+    const newDataSeries = {
+      name: districtName,
+      data: [districtTestCases]
+    };
+
+    generatedLabels.push(districtName);
+    generatedSeries.push(newDataSeries);
+  }
+
+  return {
+    labels: generatedLabels,
+    series: generatedSeries
+  }
+}
 
 
 function getOldestDate(state: State): string {

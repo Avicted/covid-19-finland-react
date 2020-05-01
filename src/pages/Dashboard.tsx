@@ -8,14 +8,15 @@ import grey from '@material-ui/core/colors/grey';
 import amber from '@material-ui/core/colors/amber';
 import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
-import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
+import CasesByDayChartCumulativeChart from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData } from '../store/reducers/reducer';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData, getTestsPerHealthCareDistrictChartData } from '../store/reducers/reducer';
 import { AppState } from '../store/configureStore';
 import TestedChart from '../components/TestedChart';
-import CasesByHealthCareDistrict from '../components/CasesByHealthCareDistrict';
+import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart';
+import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareDistrictChart';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -84,7 +85,8 @@ class Dashboard extends Component<Props, IMyState> {
       recoveredChartDataCumulative,
       testsChartData,
       testsChartDataCumulative,
-      infectionsByHealthCareDistrictChartData
+      infectionsByHealthCareDistrictChartData,
+      testsPerHealthCareDistrictChartData
     } = this.props;
     
     return (
@@ -118,7 +120,7 @@ class Dashboard extends Component<Props, IMyState> {
             <CasesByDayChart confirmed={confirmedChartData} recovered={recoveredChartData} deaths={deathsChartData} />
           </Grid>
           <Grid item xs={12} lg={6}>
-            <CasesByDayChartCumulative confirmed={confirmedChartDataCumulative} recovered={recoveredChartDataCumulative} deaths={deathsChartDataCumulative} />
+            <CasesByDayChartCumulativeChart confirmed={confirmedChartDataCumulative} recovered={recoveredChartDataCumulative} deaths={deathsChartDataCumulative} />
           </Grid>
           
           <Grid item xs={12} lg={6}>
@@ -129,7 +131,10 @@ class Dashboard extends Component<Props, IMyState> {
           </Grid>
           
           <Grid item xs={12} lg={6}>
-            <CasesByHealthCareDistrict series={infectionsByHealthCareDistrictChartData?.series} labels={infectionsByHealthCareDistrictChartData?.labels}/>
+            <CasesByHealthCareDistrictChart series={infectionsByHealthCareDistrictChartData?.series} labels={infectionsByHealthCareDistrictChartData?.labels}/>
+          </Grid>
+          <Grid item xs={12} lg={6}>
+            <TestedPerHealthCareDistrictChart series={testsPerHealthCareDistrictChartData?.series} labels={testsPerHealthCareDistrictChartData?.labels}/>
           </Grid>
 
         </Grid>
@@ -141,7 +146,6 @@ class Dashboard extends Component<Props, IMyState> {
 const mapStateToProps = (state: AppState) => {
   return {
     hcdTestDataPending: state.finland.hcdTestDataPending,
-    // hcdTestData: state.finland.hcdTestData,
     hcdTestData: getHcdTestData(state.finland),
     finnishCoronaData: state.finland.finnishCoronaData,
     finnishCoronaDataPending: state.finland.finnishCoronaDataPending,
@@ -170,6 +174,7 @@ const mapStateToProps = (state: AppState) => {
     testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
 
     infectionsByHealthCareDistrictChartData: getInfectionsByHealthCareDistrictChartData(state.finland),
+    testsPerHealthCareDistrictChartData: getTestsPerHealthCareDistrictChartData(state.finland),
   }
 };
 
