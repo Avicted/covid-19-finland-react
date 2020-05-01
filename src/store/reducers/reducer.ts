@@ -321,6 +321,71 @@ export const getRecoveredChartDataCumulative = (state: State) => {
   return data;
 }
 
+
+export const getInfectionsByHealthCareDistrictChartData = (state: State) => {
+  const confirmedCases = getFinnishCoronaData(state).confirmed
+  const confirmedCasesCount = confirmedCases.length;
+
+  if (confirmedCasesCount <= 0) {
+    return null;
+  }
+
+  const casesPerHealthCareDistrict: string | any[] = [];
+
+  for (let i = 0; i < confirmedCasesCount; i++) {
+    let found = false;
+
+    for (let j = 0; j < casesPerHealthCareDistrict.length; j++) {
+      if (confirmedCases[i].healthCareDistrict === null) {
+        confirmedCases[i].healthCareDistrict = "Unknown";
+      }
+
+      if (confirmedCases[i].healthCareDistrict === casesPerHealthCareDistrict[j].healthCareDistrict) {
+        found = true;
+        casesPerHealthCareDistrict[j].count = casesPerHealthCareDistrict[j].count + 1;
+        break;
+      }
+    }
+
+    if (!found) {
+      casesPerHealthCareDistrict.push({
+        healthCareDistrict: confirmedCases[i].healthCareDistrict,
+        count: 1
+      });
+    }
+  }
+
+  // Add the count to the name of the healthCareDistrict
+  const generatedLabels: string[] = [];
+  const series: number[] = [];
+
+  for (let i = 0; i < casesPerHealthCareDistrict.length; i++) {
+    const healthCareDistrict = casesPerHealthCareDistrict[i].healthCareDistrict;
+    const count = casesPerHealthCareDistrict[i].count;
+
+    casesPerHealthCareDistrict[i].healthCareDistrict = `${healthCareDistrict}`;
+    generatedLabels.push(casesPerHealthCareDistrict[i].healthCareDistrict);
+    series.push(count);
+  }
+
+  let generatedSeries: any = [];
+  for (let i = 0; i < generatedLabels.length; i++) {
+    const newDataSeries = {
+      name: generatedLabels[i],
+      data: [series[i]]
+    };
+
+    generatedSeries.push(newDataSeries);
+  }
+
+  return {
+    labels: generatedLabels,
+    series: generatedSeries
+  }
+}
+
+
+
 function getOldestDate(state: State): string {
   const confirmed = getFinnishCoronaData(state).confirmed
   const confirmedCasesCount = confirmed.length;

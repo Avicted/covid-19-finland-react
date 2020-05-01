@@ -12,9 +12,10 @@ import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative } from '../store/reducers/reducer';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData } from '../store/reducers/reducer';
 import { AppState } from '../store/configureStore';
 import TestedChart from '../components/TestedChart';
+import CasesByHealthCareDistrict from '../components/CasesByHealthCareDistrict';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -82,7 +83,8 @@ class Dashboard extends Component<Props, IMyState> {
       deathsChartDataCumulative,
       recoveredChartDataCumulative,
       testsChartData,
-      testsChartDataCumulative
+      testsChartDataCumulative,
+      infectionsByHealthCareDistrictChartData
     } = this.props;
     
     return (
@@ -125,6 +127,10 @@ class Dashboard extends Component<Props, IMyState> {
           <Grid item xs={12} lg={6}>
             <TestedChart title="Tests by day (cumulative)" tests={testsChartDataCumulative} />
           </Grid>
+          
+          <Grid item xs={12} lg={6}>
+            <CasesByHealthCareDistrict series={infectionsByHealthCareDistrictChartData?.series} labels={infectionsByHealthCareDistrictChartData?.labels}/>
+          </Grid>
 
         </Grid>
       </Container>
@@ -162,6 +168,8 @@ const mapStateToProps = (state: AppState) => {
 
     testsChartData: getTestsPerDayChartData(state.finland),
     testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
+
+    infectionsByHealthCareDistrictChartData: getInfectionsByHealthCareDistrictChartData(state.finland),
   }
 };
 
