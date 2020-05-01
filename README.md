@@ -1,3 +1,14 @@
+## Description
+React web app that displays data about COVID-19 cases in Finland.
+
+### Data source Finland
+https://github.com/HS-Datadesk/koronavirus-avoindata
+
+### Data source global
+https://ourworldindata.org/coronavirus-source-data
+
+---
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
