@@ -86,7 +86,15 @@ class CasesByDayChart extends Component<Props, IState> {
       },
       yaxis: {
         labels: {
-          minWidth: 40
+          minWidth: 40,
+          formatter: function(value: number) {
+            if (value > 999) {
+              const result = (value / 1000).toFixed(1);
+              return `${result}k`;
+            } else {
+              return value;
+            }
+          }
         }
       },
       plotOptions: {
