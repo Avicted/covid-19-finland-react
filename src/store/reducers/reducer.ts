@@ -1,6 +1,7 @@
 import { HcdTestData } from '../../models/HcdTestData';
 import { DataActionTypes } from '../../models/actions';
 import { FinnishCoronaData } from '../../models/FinnishCoronaData';
+import { ThlTestData } from '../../models/ThlTestData';
 import moment from 'moment';
 
 export type State = {
@@ -8,6 +9,8 @@ export type State = {
   readonly finnishCoronaData: FinnishCoronaData;
   readonly hcdTestDataPending: Boolean;
   readonly hcdTestData: HcdTestData;
+  readonly thlTestDataPending: Boolean;
+  readonly thlTestData: ThlTestData;
   readonly error: Boolean;
 };
 
@@ -20,6 +23,10 @@ const initialState: State = {
   },
   hcdTestDataPending: false,
   hcdTestData: {},
+  thlTestDataPending: false,
+  thlTestData: {
+    tested: []
+  },
   error: false
 }
 
@@ -59,12 +66,28 @@ export const dataReducer = (state = initialState, action: DataActionTypes) => {
         hcdTestDataPending: false,
         error: action.error
       }
+    case "FETCH_THL_TEST_DATA_PENDING":
+      return {
+        ...state,
+        thlTestDataPending: true
+      }
+    case "FETCH_THL_TEST_DATA_SUCCESS":
+      return {
+        ...state,
+        thlTestDataPending: false,
+        thlTestData: action.payload
+      }
+    case "FETCH_THL_TEST_DATA_ERROR":
+      return {
+        ...state,
+        thlTestDataPending: false,
+        error: action.error
+      }
     default:
       return state;
   }
 }
 
-// @TODO: all the reducer data parsing results should be stored inside the state !!!!!!!!!
 export const getFinnishCoronaData = (state: State) => state.finnishCoronaData;
 export const getHcdTestData = (state: State) => state.hcdTestData;
 export const getFinnishCoronaDataPending = (state: State) => state.finnishCoronaDataPending;
@@ -77,6 +100,8 @@ export const getTotalDeaths = (state: State): number => state.finnishCoronaData?
 export const getTotalInfected = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.infected;
 export const getTotalPopulation = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.population;
 export const getTotalTested = (state: State): number => state.hcdTestData["Kaikki sairaanhoitopiirit"]?.tested;
+
+export const getThlTestData = (state: State) => state.thlTestData;
 
 
 export const getChangeToday = (state: State): string => {
@@ -201,6 +226,68 @@ export const getRecoveredChartData = (state: State) => {
   return data;
 }
 
+
+export const getTestsPerDayChartData = (state: State) => {
+  const tested = getThlTestData(state).tested
+  const testedCount = tested.length
+
+  if (testedCount <= 0) {
+    return null;
+  }
+
+  let data: [number, number][] = [];
+  for (let i = 0; i < testedCount; i++) {
+    const datetime = tested[i].date;
+    const date = new Date(datetime).toISOString().substr(0, 10);
+    const milliseconds = new Date(date).getTime();
+    data.push([milliseconds, tested[i].value])
+  }
+
+  return data
+}
+
+export const getTestsPerDayChartDataCumulative = (state: State) => {
+  const testCases = getThlTestData(state).tested
+  const testCasesCount = testCases.length
+
+  if (testCasesCount <= 0) {
+    return null;
+  }
+
+  const todaysDate = new Date().toISOString();
+  const today = moment(todaysDate).format("YYYY-MM-DD");
+  const oldest = getOldestDate(state)
+  const generatedDates: [number, number][] = [];
+
+  for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, "days")) {
+    const currentMilliseconds = new Date(
+      m.format("YYYY-MM-DD")
+    ).getTime();
+    generatedDates.push([currentMilliseconds, 0]);
+  }
+
+  // Assign the data to the generated dates
+  for (let i = 0; i < generatedDates.length; i++) {
+    const currentMilliseconds = generatedDates[i][0];
+
+    for (let j = 0; j < testCasesCount; j++) {
+      const datetime = testCases[j].date;
+      const date = new Date(datetime).toISOString().substr(0, 10);
+      const milliseconds = new Date(date).getTime();
+
+      if (currentMilliseconds === milliseconds) {
+        generatedDates[i][1] = generatedDates[i][1] + testCases[j].value;
+      }
+    }
+
+    if (i > 0) {
+      generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1];
+    }
+  }
+
+  return generatedDates;
+}
+
 export const getConfirmedChartDataCumulative = (state: State) => {
   const confirmed = getFinnishCoronaData(state).confirmed
 
@@ -234,29 +321,29 @@ export const getRecoveredChartDataCumulative = (state: State) => {
   return data;
 }
 
-function generateMissingDates(state: State, data: any, cumulative: boolean = false): [number, number][] {
+function getOldestDate(state: State): string {
   const confirmed = getFinnishCoronaData(state).confirmed
-  const confirmedCasesCount = data.length;
-
-  const cases = data;
-  const casesCount = confirmedCasesCount;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const casesByDay: any = [];
-
-  const generatedDates: [number, number][] = [];
-  const todaysDate = new Date().toISOString();
+  const confirmedCasesCount = confirmed.length;
   let oldestDate = new Date().toISOString();
 
   for (let i = 0; i < confirmedCasesCount; i++) {
     const datetime = confirmed[i].date;
-    const date = new Date(datetime).toISOString().substr(0, 10);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const milliseconds = new Date(date).getTime();
-
     if (Date.parse(datetime) < Date.parse(oldestDate)) {
       oldestDate = datetime;
     }
   }
+
+  return oldestDate
+}
+
+function generateMissingDates(state: State, data: any, cumulative: boolean = false): [number, number][] {
+  const cases = data;
+  const casesCount = data.length;
+  const casesByDay: [number, number][] = [];
+
+  const generatedDates: [number, number][] = [];
+  const todaysDate = new Date().toISOString();
+  let oldestDate = getOldestDate(state)
 
   for (let i = 0; i < casesCount; i++) {
     const datetime = cases[i].date;
@@ -315,8 +402,10 @@ function generateMissingDates(state: State, data: any, cumulative: boolean = fal
       }
     }
 
-    if (i > 0 && !caseFoundOnDate) {
-      generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1];
+    if (cumulative) {
+      if (i > 0 && !caseFoundOnDate) {
+        generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1];
+      }
     }
   }
 

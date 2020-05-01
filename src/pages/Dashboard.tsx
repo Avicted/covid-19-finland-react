@@ -10,10 +10,11 @@ import pink from '@material-ui/core/colors/pink';
 import CasesByDayChart from '../components/CasesByDayChart';
 import CasesByDayChartCumulative from '../components/CasesByDayChartCumulative';
 import { connect } from 'react-redux';
-import { fetchFinnishCoronaData, fetchHcdTestData } from '../store/actions/actions';
+import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative } from '../store/reducers/reducer';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative } from '../store/reducers/reducer';
 import { AppState } from '../store/configureStore';
+import TestedChart from '../components/TestedChart';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -45,6 +46,7 @@ class Dashboard extends Component<Props, IMyState> {
   componentDidMount() {
     this.props.fetchHcdTestData()
     this.props.fetchFinnishCoronaData()
+    this.props.fetchThlTestData()
   }
 
   shouldComponentRender() {
@@ -78,7 +80,9 @@ class Dashboard extends Component<Props, IMyState> {
       changeToday, 
       confirmedChartDataCumulative, 
       deathsChartDataCumulative,
-      recoveredChartDataCumulative 
+      recoveredChartDataCumulative,
+      testsChartData,
+      testsChartDataCumulative
     } = this.props;
     
     return (
@@ -114,6 +118,13 @@ class Dashboard extends Component<Props, IMyState> {
           <Grid item xs={12} lg={6}>
             <CasesByDayChartCumulative confirmed={confirmedChartDataCumulative} recovered={recoveredChartDataCumulative} deaths={deathsChartDataCumulative} />
           </Grid>
+          
+          <Grid item xs={12} lg={6}>
+            <TestedChart title="Tests by day" tests={testsChartData} />
+          </Grid>
+          <Grid item xs={12} lg={6}>
+            <TestedChart title="Tests by day (cumulative)" tests={testsChartDataCumulative} />
+          </Grid>
 
         </Grid>
       </Container>
@@ -148,6 +159,9 @@ const mapStateToProps = (state: AppState) => {
     recoveredChartDataCumulative: getRecoveredChartDataCumulative(state.finland),
 
     changeToday: getChangeToday(state.finland),
+
+    testsChartData: getTestsPerDayChartData(state.finland),
+    testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
   }
 };
 
@@ -155,7 +169,8 @@ const mapDispatchToProps = (dispatch: any) =>
   bindActionCreators(
     {
       fetchHcdTestData: fetchHcdTestData,
-      fetchFinnishCoronaData: fetchFinnishCoronaData
+      fetchFinnishCoronaData: fetchFinnishCoronaData,
+      fetchThlTestData: fetchThlTestData
     },
     dispatch
   );

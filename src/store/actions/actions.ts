@@ -5,11 +5,15 @@ import {
   FETCH_DATA_ERROR, 
   FETCH_HCD_TEST_DATA_PENDING, 
   FETCH_HCD_TEST_DATA_SUCCESS, 
-  FETCH_HCD_TEST_DATA_ERROR 
+  FETCH_HCD_TEST_DATA_ERROR,
+  FETCH_THL_TEST_DATA_PENDING, 
+  FETCH_THL_TEST_DATA_SUCCESS, 
+  FETCH_THL_TEST_DATA_ERROR 
 } from "../../models/actions";
 import { HcdTestData } from "../../models/HcdTestData";
 import { FinnishCoronaData } from "../../models/FinnishCoronaData";
 import { Dispatch } from "react";
+import { ThlTestData } from "../../models/ThlTestData";
 
 
 export const fetchDataPending = (): AppActions => ({
@@ -26,6 +30,7 @@ export const fetchDataError = (error: Boolean): AppActions => ({
   error: error
 })
 
+
 export const fetchHcdTestDataPending = (): AppActions => ({
   type: FETCH_HCD_TEST_DATA_PENDING
 })
@@ -37,6 +42,21 @@ export const fetchHcdTestDataSuccess = (data: HcdTestData): AppActions => ({
 
 export const fetchHcdTestDataError = (error: Boolean): AppActions => ({
   type: FETCH_HCD_TEST_DATA_ERROR,
+  error: error
+})
+
+
+export const fetchThlTestDataPending = (): AppActions => ({
+  type: FETCH_THL_TEST_DATA_PENDING
+})
+
+export const fetchThlTestDataSuccess = (data: ThlTestData): AppActions => ({
+  type: FETCH_THL_TEST_DATA_SUCCESS,
+  payload: data
+})
+
+export const fetchThlTestDataError = (error: Boolean): AppActions => ({
+  type: FETCH_THL_TEST_DATA_ERROR,
   error: error
 })
 
@@ -74,6 +94,25 @@ export function fetchHcdTestData() {
       })
       .catch(error => {
         dispatch(fetchHcdTestDataError(error));
+      })
+  }
+}
+
+export function fetchThlTestData() {
+  return async (dispatch: Dispatch<AppActions>) => {
+    dispatch(fetchThlTestDataPending());
+    await fetch('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/thlTestData')
+      .then(res => res.json())
+      .then(res => {
+        if (res.error) {
+          throw (res.error);
+        }
+
+        dispatch(fetchThlTestDataSuccess(res));
+        return res;
+      })
+      .catch(error => {
+        dispatch(fetchThlTestDataError(error));
       })
   }
 }
