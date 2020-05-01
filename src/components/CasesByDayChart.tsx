@@ -193,6 +193,7 @@ class CasesByDayChart extends Component<Props, IState> {
 
   render() {
     const { classes } = this.props
+    const { type } = this.state.options.chart
 
     return (
       <div>
@@ -211,9 +212,9 @@ class CasesByDayChart extends Component<Props, IState> {
               open={Boolean(this.state.anchorEl)}
               onClose={(e) => this.handleClose(e)}
             >
-              <MenuItem dense onClick={() => this.handleChartTypeSelection('area')}>Area</MenuItem>
-              <MenuItem dense onClick={() => this.handleChartTypeSelection('line')}>Line</MenuItem>
-              <MenuItem dense onClick={() => this.handleChartTypeSelection('bar')}>Bar</MenuItem>
+              <MenuItem selected={type === 'area' ? true : false} dense onClick={() => this.handleChartTypeSelection('area')}>Area</MenuItem>
+              <MenuItem selected={type === 'line' ? true : false} dense onClick={() => this.handleChartTypeSelection('line')}>Line</MenuItem>
+              <MenuItem selected={type === 'bar' ? true : false} dense onClick={() => this.handleChartTypeSelection('bar')}>Bar</MenuItem>
             </Menu>
             <div className={classes.chart}>
               <ReactApexChart options={this.state.options} series={this.state.series} type={this.state.options.chart.type as any} width='100%' height={300} />
