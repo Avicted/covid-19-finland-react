@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Card, Typography, CardContent, Button, Menu, MenuItem, WithStyles, Theme, StyleRules, createStyles, withStyles } from '@material-ui/core'
-import Chart from 'react-apexcharts';
+import ReactApexChart from 'react-apexcharts';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -14,10 +14,14 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
     },
     title: {
       fontSize: 14,
-      marginBottom: 0
+      marginBottom: 0,
+      display: 'inline'
+    },
+    chartTypeMenuButton: {
+      float: 'right'
     },
     chart: {
-
+      paddingTop: 14
     }
   })
 
@@ -30,7 +34,7 @@ interface IProps {
 interface IState {
   options: any,
   series: any,
-  anchorEl: HTMLElement | null
+  anchorEl: any
 }
 
 type Props = WithStyles<typeof styles> & IProps
@@ -42,7 +46,12 @@ class CasesByDayChart extends Component<Props, IState> {
       theme: {
         mode: "dark"
       },
-      colors: ["#ce93d8", "#81c784", "#e57373", "#ffd54f"],
+      // colors: ["#ce93d8", "#81c784", "#e57373"],
+      colors: [
+        'rgba( 206, 147, 216, 1)',
+        'rgba(129, 199, 132, 1)',
+        'rgba(229, 115, 115, 1)'
+      ],
       chart: {
         id: "cases-by-day",
         type: "area",
@@ -94,8 +103,21 @@ class CasesByDayChart extends Component<Props, IState> {
         show: true,
         curve: "straight",
         colors: undefined,
-        width: [2, 2, 2, 2],
-        dashArray: [0, 0, 0, 0]
+        width: [2, 2, 2],
+        dashArray: [0, 0, 0]
+      },
+      fill: {
+        colors: undefined,
+        opacity: 0.1,
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          type: "vertical",
+          shadeIntensity: 0.5,
+          inverseColors: true,
+          opacityFrom: 0,
+          opacityTo: 0.1,
+        },
       },
       dataLabels: {
         enabled: false
@@ -129,19 +151,41 @@ class CasesByDayChart extends Component<Props, IState> {
     ]
   }
 
-  handleChartTypeSelection = (chartType: any) => {
-    this.setState(state => {
-      state.options.chart.type = chartType
+  handleChartTypeSelection(chartType: any) {
+    let fill: any = this.state.options.fill;
+
+    if (chartType === 'line') {
+      fill = {
+        ...this.state.options.fill,
+        type: 'solid',
+      }
+    } else {
+      fill = {
+        ...this.state.options.fill,
+        type: 'gradient',
+      }
+    }
+
+    this.setState({
+      anchorEl: null,
+      options: {
+        ...this.state.options,
+        chart: {
+          ...this.state.options.chart,
+          type: chartType
+        },
+        fill: fill
+      }
     })
   }
 
-  handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    this.setState((state: any) => ({
+  handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    this.setState({
       anchorEl: event.currentTarget
-    }));
+    });
   }
-  
-  handleClose = () => {
+
+  handleClose(event: any) {
     this.setState({
       anchorEl: null
     });
@@ -156,23 +200,23 @@ class CasesByDayChart extends Component<Props, IState> {
           <CardContent className={classes.cardcontent}>
             <Typography className={classes.title} gutterBottom>
               Cases by day
-              </Typography>
-            <Button aria-controls="simple-menu" aria-haspopup="true" size="small" color="primary" onClick={this.handleClick}>
-              Open Menu
-              </Button>
+            </Typography>
+            <Button className={classes.chartTypeMenuButton} aria-controls="simple-menu" aria-haspopup="true" size="small" color="primary" onClick={(e) => this.handleClick(e)}>
+              Chart style
+            </Button>
             <Menu
               id="simple-menu"
               anchorEl={this.state.anchorEl}
               keepMounted
               open={Boolean(this.state.anchorEl)}
-              onClose={this.handleClose}
+              onClose={(e) => this.handleClose(e)}
             >
-              <MenuItem onClick={() => this.handleChartTypeSelection('area')}>Area</MenuItem>
-              <MenuItem onClick={() => this.handleChartTypeSelection('line')}>Line</MenuItem>
-              <MenuItem onClick={() => this.handleChartTypeSelection('bar')}>Bar</MenuItem>
+              <MenuItem dense onClick={() => this.handleChartTypeSelection('area')}>Area</MenuItem>
+              <MenuItem dense onClick={() => this.handleChartTypeSelection('line')}>Line</MenuItem>
+              <MenuItem dense onClick={() => this.handleChartTypeSelection('bar')}>Bar</MenuItem>
             </Menu>
             <div className={classes.chart}>
-              <Chart options={this.state.options} series={this.state.series} width='100%' height={300} />
+              <ReactApexChart options={this.state.options} series={this.state.series} type={this.state.options.chart.type as any} width='100%' height={300} />
             </div>
           </CardContent>
         </Card>
