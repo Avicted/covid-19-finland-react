@@ -17,6 +17,7 @@ import { AppState } from '../store/configureStore';
 import TestedChart from '../components/TestedChart';
 import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart';
 import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareDistrictChart';
+import Footer from '../components/Footer';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -138,6 +139,8 @@ class Dashboard extends Component<Props, IMyState> {
           </Grid>
 
         </Grid>
+
+        <Footer />
       </Container>
     )
   }
