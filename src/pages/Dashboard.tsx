@@ -12,7 +12,7 @@ import CasesByDayChartCumulativeChart from '../components/CasesByDayChartCumulat
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData, getTestsPerHealthCareDistrictChartData } from '../store/reducers/reducer';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData, getTestsPerHealthCareDistrictChartData } from '../store/selectors/selector';
 import { AppState } from '../store/configureStore';
 import TestedChart from '../components/TestedChart';
 import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart';
