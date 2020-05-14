@@ -3,7 +3,6 @@ import { Card, Typography, CardContent, Button, Menu, MenuItem, WithStyles, Them
 import ReactApexChart from 'react-apexcharts';
 import { ConnectedProps, connect } from 'react-redux';
 import { AppState } from '../store/configureStore';
-import { getTestsPerDayChartData } from '../store/selectors/selector';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({

@@ -31,16 +31,16 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
     },
   })
 
-interface IMyProps { }
-interface IMyState { }
+interface IProps { }
+interface IState { }
 
 type Props = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps> &
   WithStyles<typeof styles> &
-  IMyProps
+  IProps
 
 
-class Dashboard extends Component<Props, IMyState> {
+class Dashboard extends Component<Props, IState> {
   constructor(props: Readonly<Props>) {
     super(props);
     this.shouldComponentRender = this.shouldComponentRender.bind(this);
@@ -144,19 +144,14 @@ const mapStateToProps = (state: AppState) => {
     hcdTestData: getHcdTestData(state.finland),
     finnishCoronaData: state.finland.finnishCoronaData,
     finnishCoronaDataPending: state.finland.finnishCoronaDataPending,
-
     totalRecovered: getTotalRecovered(state.finland),
     totalDeaths: getTotalDeaths(state.finland),
-
     error: state.finland.error,
-
     totalInfected: getTotalInfected(state.finland),
     totalPopulation: getTotalPopulation(state.finland),
     totalTested: getTotalTested(state.finland),
     percentageOfPopulationTested: getPercentageOfPopulationTested(state.finland),
-
     changeToday: getChangeToday(state.finland),
-
     testsChartData: getTestsPerDayChartData(state.finland),
     testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
   }
@@ -171,6 +166,5 @@ const mapDispatchToProps = (dispatch: any) =>
     },
     dispatch
   );
-
 
 export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Dashboard));
