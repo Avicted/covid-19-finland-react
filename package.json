@@ -31,6 +31,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "format": "prettier --write src/**/*.{ts,tsx,scss,css,json}",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -50,6 +51,7 @@
   },
   "devDependencies": {
     "@types/react-redux": "^7.1.7",
-    "@types/redux-logger": "^3.0.7"
+    "@types/redux-logger": "^3.0.7",
+    "prettier": "2.0.5"
   }
 }

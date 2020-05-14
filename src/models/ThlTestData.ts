@@ -1,8 +1,8 @@
 export interface ThlTestDataItem {
-  value: number,
-  date: string,
+    value: number
+    date: string
 }
 
 export interface ThlTestData {
-  tested: ThlTestDataItem[]
+    tested: ThlTestDataItem[]
 }
