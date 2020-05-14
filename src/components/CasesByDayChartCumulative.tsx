@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { Card, Typography, CardContent, Button, Menu, MenuItem, WithStyles, Theme, StyleRules, createStyles, withStyles } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts';
+import { ConnectedProps, connect } from 'react-redux';
+import { AppState } from '../store/configureStore';
+import { getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative } from '../store/selectors/selector';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -25,11 +28,7 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
     }
   })
 
-interface IProps {
-  confirmed: any,
-  recovered: any,
-  deaths: any
-}
+interface IProps {}
 
 interface IState {
   options: any,
@@ -37,7 +36,7 @@ interface IState {
   anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps
+type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
 
 class CasesByDayChartCumulativeChart extends Component<Props, IState> {
   state = {
@@ -234,4 +233,15 @@ class CasesByDayChartCumulativeChart extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(CasesByDayChartCumulativeChart)
+const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
+  confirmed: getConfirmedChartDataCumulative(state.finland),
+  deaths: getDeathsChartDataCumulative(state.finland),
+  recovered: getRecoveredChartDataCumulative(state.finland),
+});
+
+const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({
+  
+});
+
+const connector = connect(mapStatesToProps, mapDispatchToProps); 
+export default connector((withStyles(styles)(CasesByDayChartCumulativeChart)));
