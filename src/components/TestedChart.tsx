@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { Card, Typography, CardContent, Button, Menu, MenuItem, WithStyles, Theme, StyleRules, createStyles, withStyles } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts';
+import { ConnectedProps, connect } from 'react-redux';
+import { AppState } from '../store/configureStore';
+import { getTestsPerDayChartData } from '../store/selectors/selector';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -36,7 +39,7 @@ interface IState {
   anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps
+type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
 
 class TestedChart extends Component<Props, IState> {
   state = {
@@ -222,4 +225,13 @@ class TestedChart extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(TestedChart)
+const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
+
+});
+
+const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({
+  
+});
+
+const connector = connect(mapStatesToProps, mapDispatchToProps); 
+export default connector((withStyles(styles)(TestedChart)));

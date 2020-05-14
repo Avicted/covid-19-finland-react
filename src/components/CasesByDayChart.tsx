@@ -1,6 +1,9 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Card, Typography, CardContent, Button, Menu, MenuItem, WithStyles, Theme, StyleRules, createStyles, withStyles } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts';
+import { AppState } from '../store/configureStore';
+import { getConfirmedChartData, getRecoveredChartData, getDeathsChartData } from '../store/selectors/selector';
+import { connect, ConnectedProps } from 'react-redux';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -25,11 +28,7 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
     }
   })
 
-interface IProps {
-  confirmed: any,
-  recovered: any,
-  deaths: any
-}
+interface IProps { }
 
 interface IState {
   options: any,
@@ -37,9 +36,9 @@ interface IState {
   anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps
+type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
 
-class CasesByDayChart extends Component<Props, IState> {
+class CasesByDayChartView extends React.Component<Props, IState> {
   state = {
     anchorEl: null,
     options: {
@@ -91,7 +90,7 @@ class CasesByDayChart extends Component<Props, IState> {
       yaxis: {
         labels: {
           minWidth: 40,
-          formatter: function(value: number) {
+          formatter: function (value: number) {
             if (value > 999) {
               const result = (value / 1000).toFixed(1);
               return `${result}k`;
@@ -200,8 +199,8 @@ class CasesByDayChart extends Component<Props, IState> {
   }
 
   render() {
-    const { classes } = this.props
-    const { type } = this.state.options.chart
+    const { classes } = this.props;
+    const { type } = this.state.options.chart;
 
     return (
       <div>
@@ -234,4 +233,15 @@ class CasesByDayChart extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(CasesByDayChart)
+const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
+  confirmed: getConfirmedChartData(state.finland),
+  recovered: getRecoveredChartData(state.finland),
+  deaths: getDeathsChartData(state.finland),
+});
+
+const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({
+  
+});
+
+const connector = connect(mapStatesToProps, mapDispatchToProps); 
+export default connector((withStyles(styles)(CasesByDayChartView)));

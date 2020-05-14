@@ -12,7 +12,7 @@ import CasesByDayChartCumulativeChart from '../components/CasesByDayChartCumulat
 import { connect } from 'react-redux';
 import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions';
 import { bindActionCreators } from 'redux';
-import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getConfirmedChartData, getDeathsChartData, getRecoveredChartData, getTotalRecovered, getTotalDeaths, getChangeToday, getConfirmedChartDataCumulative, getDeathsChartDataCumulative, getRecoveredChartDataCumulative, getTestsPerDayChartData, getTestsPerDayChartDataCumulative, getInfectionsByHealthCareDistrictChartData, getTestsPerHealthCareDistrictChartData } from '../store/selectors/selector';
+import { getHcdTestData, getTotalInfected, getTotalPopulation, getTotalTested, getPercentageOfPopulationTested, getTotalRecovered, getTotalDeaths, getChangeToday, getTestsPerDayChartData, getTestsPerDayChartDataCumulative } from '../store/selectors/selector';
 import { AppState } from '../store/configureStore';
 import TestedChart from '../components/TestedChart';
 import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart';
@@ -71,25 +71,17 @@ class Dashboard extends Component<Props, IMyState> {
     }
 
     // fetch the reducer getters after the initial data has loaded
-    const { 
-      totalInfected, 
-      percentageOfPopulationTested, 
-      totalTested, 
-      confirmedChartData, 
-      deathsChartData, 
-      recoveredChartData, 
-      totalRecovered, 
-      totalDeaths, 
-      changeToday, 
-      confirmedChartDataCumulative, 
-      deathsChartDataCumulative,
-      recoveredChartDataCumulative,
+    const {
+      totalInfected,
+      percentageOfPopulationTested,
+      totalTested,
+      totalRecovered,
+      totalDeaths,
+      changeToday,
       testsChartData,
       testsChartDataCumulative,
-      infectionsByHealthCareDistrictChartData,
-      testsPerHealthCareDistrictChartData
     } = this.props;
-    
+
     return (
       <Container className={classes.container} maxWidth="lg">
         <Grid container spacing={2}>
@@ -118,24 +110,24 @@ class Dashboard extends Component<Props, IMyState> {
           </Grid>
 
           <Grid item xs={12} lg={6}>
-            <CasesByDayChart confirmed={confirmedChartData} recovered={recoveredChartData} deaths={deathsChartData} />
+            <CasesByDayChart />
           </Grid>
           <Grid item xs={12} lg={6}>
-            <CasesByDayChartCumulativeChart confirmed={confirmedChartDataCumulative} recovered={recoveredChartDataCumulative} deaths={deathsChartDataCumulative} />
+            <CasesByDayChartCumulativeChart />
           </Grid>
-          
+
           <Grid item xs={12} lg={6}>
             <TestedChart title="Tests by day" tests={testsChartData} />
           </Grid>
           <Grid item xs={12} lg={6}>
             <TestedChart title="Tests by day (cumulative)" tests={testsChartDataCumulative} />
           </Grid>
-          
+
           <Grid item xs={12} lg={6}>
-            <CasesByHealthCareDistrictChart series={infectionsByHealthCareDistrictChartData?.series} labels={infectionsByHealthCareDistrictChartData?.labels}/>
+            <CasesByHealthCareDistrictChart />
           </Grid>
           <Grid item xs={12} lg={6}>
-            <TestedPerHealthCareDistrictChart series={testsPerHealthCareDistrictChartData?.series} labels={testsPerHealthCareDistrictChartData?.labels}/>
+            <TestedPerHealthCareDistrictChart />
           </Grid>
 
         </Grid>
@@ -163,21 +155,10 @@ const mapStateToProps = (state: AppState) => {
     totalTested: getTotalTested(state.finland),
     percentageOfPopulationTested: getPercentageOfPopulationTested(state.finland),
 
-    confirmedChartData: getConfirmedChartData(state.finland),
-    deathsChartData: getDeathsChartData(state.finland),
-    recoveredChartData: getRecoveredChartData(state.finland),
-    
-    confirmedChartDataCumulative: getConfirmedChartDataCumulative(state.finland),
-    deathsChartDataCumulative: getDeathsChartDataCumulative(state.finland),
-    recoveredChartDataCumulative: getRecoveredChartDataCumulative(state.finland),
-
     changeToday: getChangeToday(state.finland),
 
     testsChartData: getTestsPerDayChartData(state.finland),
     testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
-
-    infectionsByHealthCareDistrictChartData: getInfectionsByHealthCareDistrictChartData(state.finland),
-    testsPerHealthCareDistrictChartData: getTestsPerHealthCareDistrictChartData(state.finland),
   }
 };
 

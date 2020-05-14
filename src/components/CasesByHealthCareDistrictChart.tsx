@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { Card, Typography, CardContent, WithStyles, Theme, StyleRules, createStyles, withStyles } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts';
+import { AppState } from '../store/configureStore';
+import { getInfectionsByHealthCareDistrictChartData } from '../store/selectors/selector';
+import { connect, ConnectedProps } from 'react-redux';
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
   createStyles({
@@ -25,10 +28,7 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
     }
   })
 
-interface IProps {
-  series: any,
-  labels: any
-}
+interface IProps {}
 
 interface IState {
   options: any,
@@ -36,7 +36,7 @@ interface IState {
   anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps
+type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
 
 class CasesByHealthCareDistrictChart extends Component<Props, IState> {
   state = {
@@ -171,4 +171,14 @@ class CasesByHealthCareDistrictChart extends Component<Props, IState> {
   }
 }
 
-export default withStyles(styles)(CasesByHealthCareDistrictChart)
+const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
+  series: getInfectionsByHealthCareDistrictChartData(state.finland)?.series,
+  labels: getInfectionsByHealthCareDistrictChartData(state.finland)?.labels,
+});
+
+const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({
+  
+});
+
+const connector = connect(mapStatesToProps, mapDispatchToProps); 
+export default connector((withStyles(styles)(CasesByHealthCareDistrictChart)));
