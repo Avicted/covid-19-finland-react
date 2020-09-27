@@ -10,9 +10,11 @@ import {
     withStyles,
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
-import { AppState } from '../store/configureStore'
-import { getInfectionsByHealthCareDistrictChartData } from '../store/selectors/selector'
-import { connect, ConnectedProps } from 'react-redux'
+import { ConnectedProps, connect } from 'react-redux'
+import { AppState } from '../../../framework/store/rootReducer'
+import { getTestsPerHealthCareDistrictChartData } from '../reducers/dashboardReducer'
+import { Dispatch } from 'redux'
+import theme from '../../../theme/theme'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -47,7 +49,7 @@ interface IState {
 
 type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
 
-class CasesByHealthCareDistrictChart extends Component<Props, IState> {
+class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
     state = {
         anchorEl: null,
         options: {
@@ -76,6 +78,7 @@ class CasesByHealthCareDistrictChart extends Component<Props, IState> {
             chart: {
                 stacked: false,
                 type: 'bar',
+                background: theme.palette.background.paper,
                 animations: {
                     enabled: false,
                 },
@@ -168,7 +171,7 @@ class CasesByHealthCareDistrictChart extends Component<Props, IState> {
                 <Card className={classes.card}>
                     <CardContent className={classes.cardcontent}>
                         <Typography className={classes.title} gutterBottom>
-                            Infections by health care district
+                            Tests by health care district
                         </Typography>
                         <div className={classes.chart}>
                             <ReactApexChart
@@ -186,12 +189,14 @@ class CasesByHealthCareDistrictChart extends Component<Props, IState> {
     }
 }
 
-const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
-    series: getInfectionsByHealthCareDistrictChartData(state.finland)?.series,
-    labels: getInfectionsByHealthCareDistrictChartData(state.finland)?.labels,
+const mapStatesToProps = (state: AppState) => ({
+    series: getTestsPerHealthCareDistrictChartData(state)?.series,
+    labels: getTestsPerHealthCareDistrictChartData(state)?.labels,
 })
 
-const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({})
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {}
+}
 
 const connector = connect(mapStatesToProps, mapDispatchToProps)
-export default connector(withStyles(styles)(CasesByHealthCareDistrictChart))
+export default connector(withStyles(styles)(TestedPerHealthCareDistrictChart))

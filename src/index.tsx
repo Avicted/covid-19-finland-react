@@ -1,19 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
-import 'typeface-roboto'
-import { Provider } from 'react-redux'
-import configureStore from './store/configureStore'
-
-const store = configureStore()
+import 'fontsource-roboto'
 
 ReactDOM.render(
     <React.Fragment>
-        <Provider store={store}>
-            <App />
-        </Provider>
+        <App />
     </React.Fragment>,
     document.getElementById('root')
 )

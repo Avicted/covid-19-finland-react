@@ -3,16 +3,17 @@ import {
     Card,
     Typography,
     CardContent,
-    WithStyles,
     Theme,
     StyleRules,
     createStyles,
     withStyles,
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
-import { ConnectedProps, connect } from 'react-redux'
-import { AppState } from '../store/configureStore'
-import { getTestsPerHealthCareDistrictChartData } from '../store/selectors/selector'
+import { connect } from 'react-redux'
+import { Dispatch } from 'redux'
+import { getInfectionsByHealthCareDistrictChartData } from '../reducers/dashboardReducer'
+import { AppState } from '../../../framework/store/rootReducer'
+import theme from '../../../theme/theme'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -37,17 +38,19 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
         },
     })
 
-interface IProps {}
+interface CasesByHealthCareDistrictChartProps {
+    classes: Record<string, string>;
+    series: any;
+    labels: any;
+}
 
-interface IState {
+interface CasesByHealthCareDistrictChartState {
     options: any
     series: any
     anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
-
-class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
+class CasesByHealthCareDistrictChart extends Component<CasesByHealthCareDistrictChartProps, CasesByHealthCareDistrictChartState> {
     state = {
         anchorEl: null,
         options: {
@@ -75,6 +78,7 @@ class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
             ],
             chart: {
                 stacked: false,
+                background: theme.palette.background.paper,
                 type: 'bar',
                 animations: {
                     enabled: false,
@@ -168,7 +172,7 @@ class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
                 <Card className={classes.card}>
                     <CardContent className={classes.cardcontent}>
                         <Typography className={classes.title} gutterBottom>
-                            Tests by health care district
+                            Infections by health care district
                         </Typography>
                         <div className={classes.chart}>
                             <ReactApexChart
@@ -186,12 +190,14 @@ class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
     }
 }
 
-const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
-    series: getTestsPerHealthCareDistrictChartData(state.finland)?.series,
-    labels: getTestsPerHealthCareDistrictChartData(state.finland)?.labels,
+const mapStatesToProps = (state: AppState) => ({
+    series: getInfectionsByHealthCareDistrictChartData(state)?.series,
+    labels: getInfectionsByHealthCareDistrictChartData(state)?.labels,
 })
 
-const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({})
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {}
+}
 
 const connector = connect(mapStatesToProps, mapDispatchToProps)
-export default connector(withStyles(styles)(TestedPerHealthCareDistrictChart))
+export default connector(withStyles(styles)(CasesByHealthCareDistrictChart))

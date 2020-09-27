@@ -6,16 +6,17 @@ import {
     Button,
     Menu,
     MenuItem,
-    WithStyles,
     Theme,
     StyleRules,
     createStyles,
     withStyles,
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
-import { AppState } from '../store/configureStore'
-import { getConfirmedChartData, getRecoveredChartData, getDeathsChartData } from '../store/selectors/selector'
-import { connect, ConnectedProps } from 'react-redux'
+import { connect } from 'react-redux'
+import { getConfirmedChartData, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
+import { AppState } from '../../../framework/store/rootReducer'
+import { Dispatch } from 'redux'
+import theme from '../../../theme/theme'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -40,30 +41,36 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
         },
     })
 
-interface IProps {}
+interface CasesByDayChartProps {
+    classes: Record<string, string>;
+    confirmed: [number, number][] | undefined; 
+    recovered:[number, number][] | undefined;
+    deaths: [number, number][] | undefined;
+}
 
-interface IState {
+interface CasesByDayChartState {
     options: any
     series: any
     anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
-
-class CasesByDayChartView extends React.Component<Props, IState> {
+class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByDayChartState> {
     state = {
         anchorEl: null,
         options: {
             theme: {
                 mode: 'dark',
             },
-            // colors: ["#ce93d8", "#81c784", "#e57373"],
-            colors: ['rgba( 206, 147, 216, 1)', 'rgba(129, 199, 132, 1)', 'rgba(229, 115, 115, 1)'],
+            colors: [
+                'rgba( 206, 147, 216, 1)', 
+                'rgba(129, 199, 132, 1)', 
+                'rgba(229, 115, 115, 1)',
+            ],
             chart: {
                 id: 'cases-by-day',
-                type: 'area',
-                // group: "covid-cases",
+                type: 'bar',
                 fontFamily: 'Roboto',
+                background: theme.palette.background.paper,
                 stacked: false,
                 animations: {
                     enabled: false,
@@ -111,7 +118,7 @@ class CasesByDayChartView extends React.Component<Props, IState> {
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    columnWidth: '90%',
+                    columnWidth: '60%',
                 },
             },
             stroke: {
@@ -124,7 +131,7 @@ class CasesByDayChartView extends React.Component<Props, IState> {
             fill: {
                 colors: undefined,
                 opacity: 0.1,
-                type: 'gradient',
+                type: 'fill',
                 gradient: {
                     shade: 'dark',
                     type: 'vertical',
@@ -169,15 +176,15 @@ class CasesByDayChartView extends React.Component<Props, IState> {
     handleChartTypeSelection(chartType: any) {
         let fill: any = this.state.options.fill
 
-        if (chartType === 'line') {
+        if (chartType === 'area') {
             fill = {
                 ...this.state.options.fill,
-                type: 'solid',
+                type: 'gradient',
             }
         } else {
             fill = {
                 ...this.state.options.fill,
-                type: 'gradient',
+                type: 'fill',
             }
         }
 
@@ -272,13 +279,15 @@ class CasesByDayChartView extends React.Component<Props, IState> {
     }
 }
 
-const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
-    confirmed: getConfirmedChartData(state.finland),
-    recovered: getRecoveredChartData(state.finland),
-    deaths: getDeathsChartData(state.finland),
+const mapStatesToProps = (state: AppState) => ({
+    confirmed: getConfirmedChartData(state),
+    recovered: getRecoveredChartData(state),
+    deaths: getDeathsChartData(state),
 })
 
-const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({})
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {}
+}
 
 const connector = connect(mapStatesToProps, mapDispatchToProps)
 export default connector(withStyles(styles)(CasesByDayChartView))

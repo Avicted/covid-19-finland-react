@@ -6,15 +6,16 @@ import {
     Button,
     Menu,
     MenuItem,
-    WithStyles,
     Theme,
     StyleRules,
     createStyles,
     withStyles,
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
-import { ConnectedProps, connect } from 'react-redux'
-import { AppState } from '../store/configureStore'
+import { connect } from 'react-redux'
+import { AppState } from '../../../framework/store/rootReducer'
+import { Dispatch } from 'redux'
+import theme from '../../../theme/theme'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -39,20 +40,19 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
         },
     })
 
-interface IProps {
-    title: string
-    tests: any
+interface TestedChartProps {
+    classes: Record<string, string>;
+    title: string;
+    tests: any;
 }
 
-interface IState {
-    options: any
-    series: any
-    anchorEl: any
+interface TestedChartPropsState {
+    options: any;
+    series: any;
+    anchorEl: any;
 }
 
-type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
-
-class TestedChart extends Component<Props, IState> {
+class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
     state = {
         anchorEl: null,
         options: {
@@ -63,8 +63,8 @@ class TestedChart extends Component<Props, IState> {
             chart: {
                 id: 'cases-by-day',
                 type: 'area',
-                // group: "covid-cases",
                 fontFamily: 'Roboto',
+                background: theme.palette.background.paper,
                 stacked: false,
                 animations: {
                     enabled: false,
@@ -265,9 +265,12 @@ class TestedChart extends Component<Props, IState> {
     }
 }
 
-const mapStatesToProps = (state: AppState, ownProps: IProps) => ({})
+const mapStatesToProps = (state: AppState) => ({
+})
 
-const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({})
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {}
+}
 
 const connector = connect(mapStatesToProps, mapDispatchToProps)
 export default connector(withStyles(styles)(TestedChart))

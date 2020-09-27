@@ -1,16 +1,6 @@
 import React, { Component } from 'react'
-import {
-    Container,
-    Grid,
-    Box,
-    withStyles,
-    Theme,
-    StyleRules,
-    createStyles,
-    WithStyles,
-    CircularProgress,
-} from '@material-ui/core'
-import KPICard from '../components/KPICard'
+import { Container, Grid, Box, withStyles, Theme, createStyles } from '@material-ui/core'
+import { KPICard } from '../components/KPICard'
 import purple from '@material-ui/core/colors/purple'
 import green from '@material-ui/core/colors/green'
 import red from '@material-ui/core/colors/red'
@@ -20,77 +10,70 @@ import pink from '@material-ui/core/colors/pink'
 import CasesByDayChart from '../components/CasesByDayChart'
 import CasesByDayChartCumulativeChart from '../components/CasesByDayChartCumulative'
 import { connect } from 'react-redux'
-import { fetchFinnishCoronaData, fetchHcdTestData, fetchThlTestData } from '../store/actions/actions'
-import { bindActionCreators } from 'redux'
-import {
-    getHcdTestData,
-    getTotalInfected,
-    getTotalPopulation,
-    getTotalTested,
-    getPercentageOfPopulationTested,
-    getTotalRecovered,
-    getTotalDeaths,
-    getChangeToday,
-    getTestsPerDayChartData,
-    getTestsPerDayChartDataCumulative,
-} from '../store/selectors/selector'
-import { AppState } from '../store/configureStore'
+import { Dispatch } from 'redux'
 import TestedChart from '../components/TestedChart'
 import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart'
 import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareDistrictChart'
-import Footer from '../components/Footer'
+import { AppState } from '../../../framework/store/rootReducer'
+import {
+    getChangeToday,
+    getData,
+    getHcdTestData,
+    getLoadingData,
+    getLoadingDataError,
+    getLoadingHcdTestData,
+    getLoadingHcdTestDataError,
+    getLoadingThlTestData,
+    getLoadingThlTestDataError,
+    getPercentageOfPopulationTested,
+    getTestsPerDayChartData,
+    getTestsPerDayChartDataCumulative,
+    getThlTestData,
+    getTotalDeaths,
+    getTotalInfected,
+    getTotalPopulation,
+    getTotalRecovered,
+    getTotalTested,
+} from '../reducers/dashboardReducer'
+import { HcdTestData } from '../../../entities/HcdTestData'
+import { FinnishCoronaData } from '../../../entities/FinnishCoronaData'
+import { ThlTestData } from '../../../entities/ThlTestData'
 
-const styles: (theme: Theme) => StyleRules<string> = () =>
+const styles = (theme: Theme) =>
     createStyles({
-        loader: {
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '50vh',
-        },
         container: {
             marginTop: 20,
         },
     })
 
-interface IProps {}
-interface IState {}
+interface DashboardProps {
+    classes: Record<string, string>
+    finnishCoronaData: FinnishCoronaData | undefined
+    loadingFinnishCoronaData: boolean
+    loadingFinnishCoronaDataError: string | undefined
 
-type Props = ReturnType<typeof mapStateToProps> &
-    ReturnType<typeof mapDispatchToProps> &
-    WithStyles<typeof styles> &
-    IProps
+    hcdTestData: HcdTestData | undefined
+    loadingHcdTestData: boolean
+    loadingHcdTestDataError: string | undefined
 
-class Dashboard extends Component<Props, IState> {
-    constructor(props: Readonly<Props>) {
-        super(props)
-        this.shouldComponentRender = this.shouldComponentRender.bind(this)
-    }
+    thlTestData: ThlTestData | undefined
+    loadingThlTestData: boolean
+    loadingThlTestDataError: string | undefined
 
-    componentDidMount() {
-        this.props.fetchHcdTestData()
-        this.props.fetchFinnishCoronaData()
-        this.props.fetchThlTestData()
-    }
+    totalRecovered: number | undefined
+    totalDeaths: number | undefined
+    totalInfected: number | undefined
+    totalPopulation: number
+    totalTested: number
+    percentageOfPopulationTested: number | string
+    changeToday: string
+    testsChartData: [number, number][] | undefined
+    testsChartDataCumulative: [number, number][] | undefined
+}
 
-    shouldComponentRender() {
-        const { hcdTestDataPending, finnishCoronaDataPending, hcdTestData, finnishCoronaData } = this.props
-        if (hcdTestDataPending === true || finnishCoronaDataPending === true) return false
-        else if (Object.keys(hcdTestData).length === 0 || finnishCoronaData.confirmed.length === 0) return false
-        return true
-    }
-
+class Dashboard extends Component<DashboardProps> {
     render() {
         const { classes } = this.props
-
-        if (!this.shouldComponentRender()) {
-            return (
-                <div className={classes.loader}>
-                    <CircularProgress />
-                </div>
-            )
-        }
-
-        // fetch the reducer getters after the initial data has loaded
         const {
             totalInfected,
             percentageOfPopulationTested,
@@ -103,7 +86,7 @@ class Dashboard extends Component<Props, IState> {
         } = this.props
 
         return (
-            <Container className={classes.container} maxWidth="lg">
+            <Container className={classes.container} maxWidth="xl">
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Box fontWeight="fontWeightLight" fontSize="h5.fontSize">
@@ -154,8 +137,6 @@ class Dashboard extends Component<Props, IState> {
                         <TestedPerHealthCareDistrictChart />
                     </Grid>
                 </Grid>
-
-                <Footer />
             </Container>
         )
     }
@@ -163,31 +144,34 @@ class Dashboard extends Component<Props, IState> {
 
 const mapStateToProps = (state: AppState) => {
     return {
-        hcdTestDataPending: state.finland.hcdTestDataPending,
-        hcdTestData: getHcdTestData(state.finland),
-        finnishCoronaData: state.finland.finnishCoronaData,
-        finnishCoronaDataPending: state.finland.finnishCoronaDataPending,
-        totalRecovered: getTotalRecovered(state.finland),
-        totalDeaths: getTotalDeaths(state.finland),
-        error: state.finland.error,
-        totalInfected: getTotalInfected(state.finland),
-        totalPopulation: getTotalPopulation(state.finland),
-        totalTested: getTotalTested(state.finland),
-        percentageOfPopulationTested: getPercentageOfPopulationTested(state.finland),
-        changeToday: getChangeToday(state.finland),
-        testsChartData: getTestsPerDayChartData(state.finland),
-        testsChartDataCumulative: getTestsPerDayChartDataCumulative(state.finland),
+        finnishCoronaData: getData(state),
+        loadingFinnishCoronaData: getLoadingData(state),
+        loadingFinnishCoronaDataError: getLoadingDataError(state),
+
+        hcdTestData: getHcdTestData(state),
+        loadingHcdTestData: getLoadingHcdTestData(state),
+        loadingHcdTestDataError: getLoadingHcdTestDataError(state),
+
+        thlTestData: getThlTestData(state),
+        loadingThlTestData: getLoadingThlTestData(state),
+        loadingThlTestDataError: getLoadingThlTestDataError(state),
+
+        totalRecovered: getTotalRecovered(state),
+        totalDeaths: getTotalDeaths(state),
+        totalInfected: getTotalInfected(state),
+        totalPopulation: getTotalPopulation(state),
+        totalTested: getTotalTested(state),
+        percentageOfPopulationTested: getPercentageOfPopulationTested(state),
+        changeToday: getChangeToday(state),
+        testsChartData: getTestsPerDayChartData(state),
+        testsChartDataCumulative: getTestsPerDayChartDataCumulative(state),
     }
 }
 
-const mapDispatchToProps = (dispatch: any) =>
-    bindActionCreators(
-        {
-            fetchHcdTestData: fetchHcdTestData,
-            fetchFinnishCoronaData: fetchFinnishCoronaData,
-            fetchThlTestData: fetchThlTestData,
-        },
-        dispatch
-    )
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {
 
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Dashboard))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Dashboard))

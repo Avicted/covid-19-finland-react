@@ -1,6 +1,17 @@
 ## Description
 React web app that displays data about COVID-19 cases in Finland.
 
+---
+
+## Development
+Install Nodejs LTS and run:
+### `npm install`
+### `npm start`
+
+This project has also been setup with configurations to run the development environment inside of docker using the Visual Studio Code remote containers extension.
+
+---
+
 ### Data source Finland
 https://github.com/HS-Datadesk/koronavirus-avoindata
 

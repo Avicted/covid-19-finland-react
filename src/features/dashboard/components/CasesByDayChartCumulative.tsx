@@ -6,20 +6,21 @@ import {
     Button,
     Menu,
     MenuItem,
-    WithStyles,
     Theme,
     StyleRules,
     createStyles,
     withStyles,
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
-import { ConnectedProps, connect } from 'react-redux'
-import { AppState } from '../store/configureStore'
+import { connect } from 'react-redux'
+import { AppState } from '../../../framework/store/rootReducer'
 import {
     getConfirmedChartDataCumulative,
     getDeathsChartDataCumulative,
     getRecoveredChartDataCumulative,
-} from '../store/selectors/selector'
+} from '../reducers/dashboardReducer'
+import { Dispatch } from 'redux'
+import theme from '../../../theme/theme'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -44,30 +45,32 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
         },
     })
 
-interface IProps {}
+interface CasesByDayChartCumulativeChartProps {
+    classes: Record<string, string>;
+    confirmed: [number, number][] | undefined; 
+    recovered:[number, number][] | undefined;
+    deaths: [number, number][] | undefined;
+}
 
-interface IState {
+interface CasesByDayChartCumulativeChartState {
     options: any
     series: any
     anchorEl: any
 }
 
-type Props = WithStyles<typeof styles> & IProps & ConnectedProps<typeof connector>
-
-class CasesByDayChartCumulativeChart extends Component<Props, IState> {
+class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulativeChartProps, CasesByDayChartCumulativeChartState> {
     state = {
         anchorEl: null,
         options: {
             theme: {
                 mode: 'dark',
             },
-            // colors: ["#ce93d8", "#81c784", "#e57373"],
             colors: ['rgba( 206, 147, 216, 1)', 'rgba(129, 199, 132, 1)', 'rgba(229, 115, 115, 1)'],
             chart: {
                 id: 'cases-by-day',
                 type: 'area',
-                // group: "covid-cases",
                 fontFamily: 'Roboto',
+                background: theme.palette.background.paper,
                 stacked: false,
                 animations: {
                     enabled: false,
@@ -276,13 +279,15 @@ class CasesByDayChartCumulativeChart extends Component<Props, IState> {
     }
 }
 
-const mapStatesToProps = (state: AppState, ownProps: IProps) => ({
-    confirmed: getConfirmedChartDataCumulative(state.finland),
-    deaths: getDeathsChartDataCumulative(state.finland),
-    recovered: getRecoveredChartDataCumulative(state.finland),
+const mapStatesToProps = (state: AppState) => ({
+    confirmed: getConfirmedChartDataCumulative(state),
+    deaths: getDeathsChartDataCumulative(state),
+    recovered: getRecoveredChartDataCumulative(state),
 })
 
-const mapDispatchToProps = (dispatch: any, ownProps: IProps) => ({})
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {}
+}
 
 const connector = connect(mapStatesToProps, mapDispatchToProps)
 export default connector(withStyles(styles)(CasesByDayChartCumulativeChart))

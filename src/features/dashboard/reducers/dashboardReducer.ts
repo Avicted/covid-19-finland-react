@@ -1,23 +1,149 @@
+import { DashboardActions, DashboardActionTypes } from '../actions/dataActions'
+import produce from 'immer'
 import moment from 'moment'
-import { State } from '../reducers/reducer'
+import { Confirmed, Deaths, FinnishCoronaData, Recovered } from '../../../entities/FinnishCoronaData'
+import { HcdTestData } from '../../../entities/HcdTestData'
+import { ThlTestData, ThlTestDataItem } from '../../../entities/ThlTestData'
+import { AppState } from '../../../framework/store/rootReducer'
 
-export const getFinnishCoronaData = (state: State) => state.finnishCoronaData
-export const getHcdTestData = (state: State) => state.hcdTestData
-export const getFinnishCoronaDataPending = (state: State) => state.finnishCoronaDataPending
-export const getHcdTestDataPending = (state: State) => state.finnishCoronaDataPending
-export const getDataError = (state: State) => state.error
+interface DashboardState {
+    data: FinnishCoronaData | undefined
+    loadingData: boolean
+    loadingDataError: string | undefined
 
-export const getTotalRecovered = (state: State): number => state.finnishCoronaData?.recovered.length
-export const getTotalDeaths = (state: State): number => state.finnishCoronaData?.deaths.length
+    hcdTestData: HcdTestData | undefined
+    loadingHcdTestData: boolean
+    loadingHcdTestDataError: string | undefined
 
-export const getTotalInfected = (state: State): number => state.hcdTestData['Kaikki sairaanhoitopiirit']?.infected
-export const getTotalPopulation = (state: State): number => state.hcdTestData['Kaikki sairaanhoitopiirit']?.population
-export const getTotalTested = (state: State): number => state.hcdTestData['Kaikki sairaanhoitopiirit']?.tested
+    thlTestData: ThlTestData | undefined
+    loadingThlTestData: boolean
+    loadingThlTestDataError: string | undefined
+}
 
-export const getThlTestData = (state: State) => state.thlTestData
+const initialState: DashboardState = {
+    data: undefined,
+    loadingData: false,
+    loadingDataError: undefined,
 
-export const getChangeToday = (state: State): string => {
-    const confirmedCases = getFinnishCoronaData(state).confirmed
+    hcdTestData: undefined,
+    loadingHcdTestData: false,
+    loadingHcdTestDataError: undefined,
+
+    thlTestData: undefined,
+    loadingThlTestData: false,
+    loadingThlTestDataError: undefined,
+}
+
+export function dashboardReducer(state: DashboardState = initialState, action: DashboardActions) {
+    switch (action.type) {
+        case DashboardActionTypes.FetchData:
+            return produce(state, (draft) => {
+                draft.loadingData = true
+                draft.loadingDataError = undefined
+            })
+        case DashboardActionTypes.FetchDataSuccess:
+            return produce(state, (draft) => {
+                draft.loadingData = false
+                draft.data = action.data
+            })
+        case DashboardActionTypes.FetchDataError:
+            return produce(state, (draft) => {
+                draft.loadingData = false
+                draft.loadingDataError = action.error
+            })
+        case DashboardActionTypes.FetchHcdTestData:
+            return produce(state, (draft) => {
+                draft.loadingHcdTestData = true
+                draft.loadingHcdTestDataError = undefined
+            })
+        case DashboardActionTypes.FetchHcdTestDataSuccess:
+            return produce(state, (draft) => {
+                draft.loadingHcdTestData = false
+                draft.hcdTestData = action.data
+            })
+        case DashboardActionTypes.FetchHcdTestDataError:
+            return produce(state, (draft) => {
+                draft.loadingHcdTestData = false
+                draft.loadingHcdTestDataError = action.error
+            })
+        case DashboardActionTypes.FetchTHLData:
+            return produce(state, (draft) => {
+                draft.loadingThlTestData = true
+                draft.loadingThlTestDataError = undefined
+            })
+        case DashboardActionTypes.FetchTHLDataSuccess:
+            return produce(state, (draft) => {
+                draft.loadingThlTestData = false
+                draft.thlTestData = action.data
+            })
+        case DashboardActionTypes.FetchTHLDataError:
+            return produce(state, (draft) => {
+                draft.loadingThlTestData = false
+                draft.loadingThlTestDataError = action.error
+            })
+        default:
+            return state
+    }
+}
+
+export function getData(state: AppState): FinnishCoronaData | undefined {
+    return state.dashboard.data
+}
+
+export function getLoadingData(state: AppState): boolean {
+    return state.dashboard.loadingData
+}
+
+export function getLoadingDataError(state: AppState): string | undefined {
+    return state.dashboard.loadingDataError
+}
+
+export function getHcdTestData(state: AppState): HcdTestData | undefined {
+    return state.dashboard.hcdTestData
+}
+
+export function getLoadingHcdTestData(state: AppState): boolean {
+    return state.dashboard.loadingHcdTestData
+}
+
+export function getLoadingHcdTestDataError(state: AppState): string | undefined {
+    return state.dashboard.loadingHcdTestDataError
+}
+
+export function getThlTestData(state: AppState): ThlTestData | undefined {
+    return state.dashboard.thlTestData
+}
+
+export function getLoadingThlTestData(state: AppState): boolean {
+    return state.dashboard.loadingThlTestData
+}
+
+export function getLoadingThlTestDataError(state: AppState): string | undefined {
+    return state.dashboard.loadingThlTestDataError
+}
+
+export function getTotalRecovered(state: AppState): number | undefined {
+    return state.dashboard.data?.recovered.length
+}
+
+export function getTotalDeaths(state: AppState): number | undefined {
+    return state.dashboard.data?.deaths.length
+}
+
+export function getTotalInfected(state: AppState): number | undefined {
+    if (state.dashboard.hcdTestData) {
+        return state.dashboard.hcdTestData['Kaikki sairaanhoitopiirit']?.infected
+    } else {
+        return undefined
+    }
+}
+
+export function getChangeToday(state: AppState): string {
+    const confirmedCases = getData(state)?.confirmed
+    if (confirmedCases === undefined) {
+        return ''
+    }
+
     const confirmedCasesCount = confirmedCases.length
 
     if (confirmedCasesCount <= 0) {
@@ -95,7 +221,23 @@ export const getChangeToday = (state: State): string => {
     return increaseToday
 }
 
-export const getPercentageOfPopulationTested = (state: State) => {
+export function getTotalPopulation(state: AppState): number {
+    if (state.dashboard.hcdTestData) {
+        return state.dashboard.hcdTestData['Kaikki sairaanhoitopiirit']?.population
+    } else {
+        return 0
+    }
+}
+
+export function getTotalTested(state: AppState): number {
+    if (state.dashboard.hcdTestData) {
+        return state.dashboard.hcdTestData['Kaikki sairaanhoitopiirit']?.tested
+    } else {
+        return 0
+    }
+}
+
+export function getPercentageOfPopulationTested(state: AppState): number | string {
     if (getTotalPopulation(state) > 0 && getTotalTested(state) > 0) {
         const percentage: number = getTotalTested(state) / getTotalPopulation(state)
         return (percentage * 100).toFixed(2)
@@ -104,45 +246,58 @@ export const getPercentageOfPopulationTested = (state: State) => {
     }
 }
 
-export const getConfirmedChartData = (state: State) => {
-    const confirmed = getFinnishCoronaData(state).confirmed
+export function getConfirmedChartData(state: AppState): [number, number][] | undefined {
+    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
+    if (confirmed === undefined) {
+        return undefined
+    }
 
     if (confirmed.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, confirmed)
     return data
 }
 
-export const getDeathsChartData = (state: State) => {
-    const deaths = getFinnishCoronaData(state).deaths
+export function getDeathsChartData(state: AppState): [number, number][] | undefined {
+    const deaths: Deaths[] | undefined = getData(state)?.deaths
+    if (deaths === undefined) {
+        return undefined
+    }
 
     if (deaths.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, deaths)
     return data
 }
 
-export const getRecoveredChartData = (state: State) => {
-    const recovered = getFinnishCoronaData(state).recovered
+export function getRecoveredChartData(state: AppState): [number, number][] | undefined {
+    const recovered: Recovered[] | undefined = getData(state)?.recovered
+    if (recovered === undefined) {
+        return undefined
+    }
 
     if (recovered.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, recovered)
     return data
 }
 
-export const getTestsPerDayChartData = (state: State) => {
-    const tested = getThlTestData(state).tested
+export function getTestsPerDayChartData(state: AppState): [number, number][] | undefined {
+    const tested: ThlTestDataItem[] | undefined = getThlTestData(state)?.tested
+    if (tested === undefined) {
+        return undefined
+    }
+
     const testedCount = tested.length
 
     if (testedCount <= 0) {
-        return null
+        return undefined
     }
 
     let data: [number, number][] = []
@@ -156,12 +311,16 @@ export const getTestsPerDayChartData = (state: State) => {
     return data
 }
 
-export const getTestsPerDayChartDataCumulative = (state: State) => {
-    const testCases = getThlTestData(state).tested
+export function getTestsPerDayChartDataCumulative(state: AppState): [number, number][] | undefined {
+    const testCases: ThlTestDataItem[] | undefined = getThlTestData(state)?.tested
+    if (testCases === undefined) {
+        return undefined
+    }
+
     const testCasesCount = testCases.length
 
     if (testCasesCount <= 0) {
-        return null
+        return undefined
     }
 
     const todaysDate = new Date().toISOString()
@@ -196,45 +355,58 @@ export const getTestsPerDayChartDataCumulative = (state: State) => {
     return generatedDates
 }
 
-export const getConfirmedChartDataCumulative = (state: State) => {
-    const confirmed = getFinnishCoronaData(state).confirmed
+export function getConfirmedChartDataCumulative(state: AppState): [number, number][] | undefined {
+    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
+    if (confirmed === undefined) {
+        return undefined
+    }
 
     if (confirmed.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, confirmed, true)
     return data
 }
 
-export const getDeathsChartDataCumulative = (state: State) => {
-    const deaths = getFinnishCoronaData(state).deaths
+export function getDeathsChartDataCumulative(state: AppState): [number, number][] | undefined {
+    const deaths: Deaths[] | undefined = getData(state)?.deaths
+    if (deaths === undefined) {
+        return undefined
+    }
 
     if (deaths.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, deaths, true)
     return data
 }
 
-export const getRecoveredChartDataCumulative = (state: State) => {
-    const recovered = getFinnishCoronaData(state).recovered
+export function getRecoveredChartDataCumulative(state: AppState): [number, number][] | undefined {
+    const recovered: Recovered[] | undefined = getData(state)?.recovered
+    if (recovered === undefined) {
+        return undefined
+    }
 
     if (recovered.length <= 0) {
-        return null
+        return undefined
     }
 
     const data = generateMissingDates(state, recovered, true)
     return data
 }
 
-export const getInfectionsByHealthCareDistrictChartData = (state: State) => {
-    const confirmedCases = getFinnishCoronaData(state).confirmed
+export function getInfectionsByHealthCareDistrictChartData(state: AppState): any {
+    const confirmedCases: Confirmed[] | undefined = getData(state)?.confirmed
+    if (confirmedCases === undefined) {
+        return undefined
+    }
+
     const confirmedCasesCount = confirmedCases.length
 
     if (confirmedCasesCount <= 0) {
-        return null
+        return undefined
     }
 
     const casesPerHealthCareDistrict: string | any[] = []
@@ -243,7 +415,7 @@ export const getInfectionsByHealthCareDistrictChartData = (state: State) => {
         let found = false
 
         for (let j = 0; j < casesPerHealthCareDistrict.length; j++) {
-            if (confirmedCases[i].healthCareDistrict === null) {
+            if (confirmedCases[i].healthCareDistrict === undefined) {
                 confirmedCases[i].healthCareDistrict = 'Unknown'
             }
 
@@ -291,11 +463,11 @@ export const getInfectionsByHealthCareDistrictChartData = (state: State) => {
     }
 }
 
-export const getTestsPerHealthCareDistrictChartData = (state: State) => {
+export function getTestsPerHealthCareDistrictChartData(state: AppState): any {
     const healthCareDistrictData = getHcdTestData(state)
 
-    if (healthCareDistrictData == null) {
-        return null
+    if (healthCareDistrictData === undefined) {
+        return undefined
     }
 
     let generatedLabels: string[] = []
@@ -322,8 +494,12 @@ export const getTestsPerHealthCareDistrictChartData = (state: State) => {
     }
 }
 
-function getOldestDate(state: State): string {
-    const confirmed = getFinnishCoronaData(state).confirmed
+function getOldestDate(state: AppState): string | undefined {
+    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
+    if (confirmed === undefined) {
+        return undefined
+    }
+
     const confirmedCasesCount = confirmed.length
     let oldestDate = new Date().toISOString()
 
@@ -337,7 +513,7 @@ function getOldestDate(state: State): string {
     return oldestDate
 }
 
-function generateMissingDates(state: State, data: any, cumulative: boolean = false): [number, number][] {
+function generateMissingDates(state: AppState, data: any, cumulative: boolean = false): [number, number][] {
     const cases = data
     const casesCount = data.length
     const casesByDay: [number, number][] = []

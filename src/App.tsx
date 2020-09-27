@@ -1,15 +1,25 @@
 import React from 'react'
-import './styles/global.css'
-import theme from './styles/theme'
-import { ThemeProvider, CssBaseline } from '@material-ui/core'
-import Dashboard from './pages/Dashboard'
+import './theme/global.css'
+import Dashboard from './features/dashboard/containers/Dashboard'
+import { Provider } from 'react-redux'
+import store from './framework/store'
+import ApplicationComponent from './framework/components/ApplicationComponent'
+import { HashRouter, Route, Switch } from 'react-router-dom'
 
+;(window as any).store = store
 function App() {
     return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Dashboard />
-        </ThemeProvider>
+        <Provider store={store}>
+            <HashRouter>
+                <ApplicationComponent>
+                    <Switch>
+                        <Route exact path="/">
+                            <Dashboard />
+                        </Route>
+                    </Switch>
+                </ApplicationComponent>
+            </HashRouter>
+        </Provider>
     )
 }
 

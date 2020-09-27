@@ -8,18 +8,27 @@ const useStyles = makeStyles({
         },
     },
     title: {
-        fontSize: 12,
+        fontSize: 14,
         marginBottom: 0,
     },
     data: {
-        fontSize: 32,
+        fontSize: 42,
         textAlign: 'center',
     },
 })
 
-function KPICard(props: { title: string; data: string | number; color: string }) {
+interface KPICardProps {
+    title: string;
+    data: number | string | undefined;
+    color: string;
+}
+
+export const KPICard: React.FunctionComponent<KPICardProps> = ({
+    title, 
+    data, 
+    color, 
+}) => {
     const classes = useStyles()
-    const { title, data, color } = props
 
     return (
         <Card>
@@ -36,5 +45,3 @@ function KPICard(props: { title: string; data: string | number; color: string })
         </Card>
     )
 }
-
-export default KPICard
