@@ -21,3 +21,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Production files
+default.conf
+nginx.conf
+Dockerfile
+docker-compose.yaml
