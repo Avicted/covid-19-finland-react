@@ -10,13 +10,14 @@ Install Nodejs LTS and run:
 
 This project has also been setup with configurations to run the development environment inside of docker using the Visual Studio Code remote containers extension.
 
+## View the app:
+
+https://covid.notasoftwaredevelopmentcompany.com/
+
 ---
 
 ### Data source Finland
 https://github.com/HS-Datadesk/koronavirus-avoindata
-
-### Data source global
-https://ourworldindata.org/coronavirus-source-data
 
 ---
 
