@@ -24,7 +24,7 @@ function Footer() {
         <div className={classes.wrapper}>
             <Box fontWeight="fontWeightRegular">
                 <Typography className={classes.text} variant="subtitle2" align="center" gutterBottom>
-                    <a className={classes.link} href="https://github.com/Avicted/covid-19-finland">
+                    <a className={classes.link} href="https://github.com/Avicted/covid-19-finland-react">
                         Source code
                     </a>
                 </Typography>
