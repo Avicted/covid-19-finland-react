@@ -3,9 +3,6 @@ import {
     Card,
     Typography,
     CardContent,
-    Button,
-    Menu,
-    MenuItem,
     Theme,
     StyleRules,
     createStyles,
@@ -21,6 +18,7 @@ import {
 } from '../reducers/dashboardReducer'
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
+import { ChartData } from '../../../entities/ChartData'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -47,9 +45,9 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
 
 interface CasesByDayChartCumulativeChartProps {
     classes: Record<string, string>;
-    confirmed: [number, number][] | undefined; 
-    recovered:[number, number][] | undefined;
-    deaths: [number, number][] | undefined;
+    confirmed: ChartData[] | undefined; 
+    recovered: ChartData[] | undefined;
+    deaths: ChartData[] | undefined;
 }
 
 interface CasesByDayChartCumulativeChartState {
@@ -65,7 +63,11 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
             theme: {
                 mode: 'dark',
             },
-            colors: ['rgba( 206, 147, 216, 1)', 'rgba(129, 199, 132, 1)', 'rgba(229, 115, 115, 1)'],
+            colors: [
+                'rgba(106, 73, 156, 1)', 
+                'rgba(129, 199, 132, 1)', 
+                'rgba(229, 115, 115, 1)'
+            ],
             chart: {
                 id: 'cases-by-day',
                 type: 'area',
@@ -160,45 +162,17 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
         series: [
             {
                 name: 'New infections',
-                data: this.props.confirmed,
+                data: this.props.confirmed?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
             },
             {
                 name: 'Recovered',
-                data: this.props.recovered,
+                data: this.props.recovered?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
             },
             {
                 name: 'Deaths',
-                data: this.props.deaths,
+                data: this.props.deaths?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
             },
         ],
-    }
-
-    handleChartTypeSelection(chartType: any) {
-        let fill: any = this.state.options.fill
-
-        if (chartType === 'line') {
-            fill = {
-                ...this.state.options.fill,
-                type: 'solid',
-            }
-        } else {
-            fill = {
-                ...this.state.options.fill,
-                type: 'gradient',
-            }
-        }
-
-        this.setState({
-            anchorEl: null,
-            options: {
-                ...this.state.options,
-                chart: {
-                    ...this.state.options.chart,
-                    type: chartType,
-                },
-                fill: fill,
-            },
-        })
     }
 
     handleClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -215,8 +189,6 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
 
     render() {
         const { classes } = this.props
-        const { type } = this.state.options.chart
-
         return (
             <div>
                 <Card className={classes.card}>
@@ -224,45 +196,6 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
                         <Typography className={classes.title} gutterBottom>
                             Cases by day (cumulative)
                         </Typography>
-                        <Button
-                            className={classes.chartTypeMenuButton}
-                            aria-controls="simple-menu"
-                            aria-haspopup="true"
-                            size="small"
-                            color="primary"
-                            onClick={(e) => this.handleClick(e)}
-                        >
-                            Chart style
-                        </Button>
-                        <Menu
-                            id="simple-menu"
-                            anchorEl={this.state.anchorEl}
-                            keepMounted
-                            open={Boolean(this.state.anchorEl)}
-                            onClose={(e) => this.handleClose(e)}
-                        >
-                            <MenuItem
-                                selected={type === 'area' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('area')}
-                            >
-                                Area
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'line' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('line')}
-                            >
-                                Line
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'bar' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('bar')}
-                            >
-                                Bar
-                            </MenuItem>
-                        </Menu>
                         <div className={classes.chart}>
                             <ReactApexChart
                                 options={this.state.options}

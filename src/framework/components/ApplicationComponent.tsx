@@ -3,7 +3,7 @@ import { Theme, createStyles, withStyles, CssBaseline, ThemeProvider, CircularPr
 import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
 import theme from '../../theme/theme'
-import Footer from './Footer'
+import { Footer } from './Footer'
 import { AppState } from '../store/rootReducer'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { HcdTestData } from '../../entities/HcdTestData'

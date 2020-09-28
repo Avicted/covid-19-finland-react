@@ -5,6 +5,7 @@ import { Confirmed, Deaths, FinnishCoronaData, Recovered } from '../../../entiti
 import { HcdTestData } from '../../../entities/HcdTestData'
 import { ThlTestData, ThlTestDataItem } from '../../../entities/ThlTestData'
 import { AppState } from '../../../framework/store/rootReducer'
+import { ChartData } from '../../../entities/ChartData'
 
 interface DashboardState {
     data: FinnishCoronaData | undefined
@@ -152,7 +153,7 @@ export function getChangeToday(state: AppState): string {
 
     const confirmedCasesByDay: any = []
 
-    const generatedDates: [number, number][] = []
+    const generatedDates: ChartData[] = []
     const todaysDate = new Date().toISOString()
     let oldestDate = new Date().toISOString()
 
@@ -191,22 +192,25 @@ export function getChangeToday(state: AppState): string {
 
     for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
         const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
-        generatedDates.push([currentMilliseconds, 0])
+        generatedDates.push({
+            unixMilliseconds: currentMilliseconds,
+            value: 0,
+        });
     }
 
     // Assign the data to the generated dates
     for (let i = 0; i < generatedDates.length; i++) {
         for (let j = 0; j < confirmedCasesByDay.length; j++) {
             const currentCaseDate = confirmedCasesByDay[j][0]
-            if (currentCaseDate === generatedDates[i][0]) {
-                generatedDates[i][1] = generatedDates[i][1] + confirmedCasesByDay[j][1]
+            if (currentCaseDate === generatedDates[i].unixMilliseconds) {
+                generatedDates[i].value = generatedDates[i].value + confirmedCasesByDay[j][1]
             }
         }
     }
 
     // Calculate the increase in cases today compared to yesterday
-    const casesToday = generatedDates[generatedDates.length - 1][1]
-    const casesYesterday = generatedDates[generatedDates.length - 2][1]
+    const casesToday = generatedDates[generatedDates.length - 1].value
+    const casesYesterday = generatedDates[generatedDates.length - 2].value
     const total = casesToday - casesYesterday
     let increaseToday: string = ''
 
@@ -246,7 +250,7 @@ export function getPercentageOfPopulationTested(state: AppState): number | strin
     }
 }
 
-export function getConfirmedChartData(state: AppState): [number, number][] | undefined {
+export function getConfirmedChartData(state: AppState): ChartData[] | undefined {
     const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
     if (confirmed === undefined) {
         return undefined
@@ -260,7 +264,42 @@ export function getConfirmedChartData(state: AppState): [number, number][] | und
     return data
 }
 
-export function getDeathsChartData(state: AppState): [number, number][] | undefined {
+export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): ChartData[] | undefined {
+    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
+    if (confirmed === undefined) {
+        return undefined
+    }
+
+    if (confirmed.length <= 0) {
+        return undefined
+    }
+
+    const data = generateMissingDates(state, confirmed)
+
+    const sevendaysRollingAverage: ChartData[] = [];
+    for (let i = 0; i < data.length; i++) {
+        if (i < 6) {
+            sevendaysRollingAverage.push({
+                unixMilliseconds: data[i].unixMilliseconds,
+                value: 0,
+            });
+
+            continue;
+        }
+
+        const chartDataSlice: ChartData[] = data.slice(i - 6, i);
+        const valuesSlice: number[] = chartDataSlice.map((chartData) => chartData.value);
+        const rollingAverage: number = valuesSlice.reduce((a, b) => (a + b)) / valuesSlice.length;
+        sevendaysRollingAverage.push({
+            unixMilliseconds: data[i].unixMilliseconds,
+            value: parseFloat(rollingAverage.toPrecision(2)),
+        });
+    }
+
+    return sevendaysRollingAverage;
+}
+
+export function getDeathsChartData(state: AppState): ChartData[] | undefined {
     const deaths: Deaths[] | undefined = getData(state)?.deaths
     if (deaths === undefined) {
         return undefined
@@ -274,7 +313,7 @@ export function getDeathsChartData(state: AppState): [number, number][] | undefi
     return data
 }
 
-export function getRecoveredChartData(state: AppState): [number, number][] | undefined {
+export function getRecoveredChartData(state: AppState): ChartData[] | undefined {
     const recovered: Recovered[] | undefined = getData(state)?.recovered
     if (recovered === undefined) {
         return undefined
@@ -288,7 +327,7 @@ export function getRecoveredChartData(state: AppState): [number, number][] | und
     return data
 }
 
-export function getTestsPerDayChartData(state: AppState): [number, number][] | undefined {
+export function getTestsPerDayChartData(state: AppState): ChartData[] | undefined {
     const tested: ThlTestDataItem[] | undefined = getThlTestData(state)?.tested
     if (tested === undefined) {
         return undefined
@@ -300,18 +339,21 @@ export function getTestsPerDayChartData(state: AppState): [number, number][] | u
         return undefined
     }
 
-    let data: [number, number][] = []
+    let data: ChartData[] = []
     for (let i = 0; i < testedCount; i++) {
         const datetime = tested[i].date
         const date = new Date(datetime).toISOString().substr(0, 10)
         const milliseconds = new Date(date).getTime()
-        data.push([milliseconds, tested[i].value])
+        data.push({
+            unixMilliseconds: milliseconds, 
+            value: tested[i].value,
+        })
     }
 
     return data
 }
 
-export function getTestsPerDayChartDataCumulative(state: AppState): [number, number][] | undefined {
+export function getTestsPerDayChartDataCumulative(state: AppState): ChartData[] | undefined {
     const testCases: ThlTestDataItem[] | undefined = getThlTestData(state)?.tested
     if (testCases === undefined) {
         return undefined
@@ -326,16 +368,19 @@ export function getTestsPerDayChartDataCumulative(state: AppState): [number, num
     const todaysDate = new Date().toISOString()
     const today = moment(todaysDate).format('YYYY-MM-DD')
     const oldest = getOldestDate(state)
-    const generatedDates: [number, number][] = []
+    const generatedDates: ChartData[] = []
 
     for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
         const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
-        generatedDates.push([currentMilliseconds, 0])
+        generatedDates.push({
+            unixMilliseconds: currentMilliseconds, 
+            value: 0,
+        })
     }
 
     // Assign the data to the generated dates
     for (let i = 0; i < generatedDates.length; i++) {
-        const currentMilliseconds = generatedDates[i][0]
+        const currentMilliseconds = generatedDates[i].unixMilliseconds
 
         for (let j = 0; j < testCasesCount; j++) {
             const datetime = testCases[j].date
@@ -343,19 +388,19 @@ export function getTestsPerDayChartDataCumulative(state: AppState): [number, num
             const milliseconds = new Date(date).getTime()
 
             if (currentMilliseconds === milliseconds) {
-                generatedDates[i][1] = generatedDates[i][1] + testCases[j].value
+                generatedDates[i].value = generatedDates[i].value + testCases[j].value
             }
         }
 
         if (i > 0) {
-            generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1]
+            generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value
         }
     }
 
     return generatedDates
 }
 
-export function getConfirmedChartDataCumulative(state: AppState): [number, number][] | undefined {
+export function getConfirmedChartDataCumulative(state: AppState): ChartData[] | undefined {
     const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
     if (confirmed === undefined) {
         return undefined
@@ -369,7 +414,7 @@ export function getConfirmedChartDataCumulative(state: AppState): [number, numbe
     return data
 }
 
-export function getDeathsChartDataCumulative(state: AppState): [number, number][] | undefined {
+export function getDeathsChartDataCumulative(state: AppState): ChartData[] | undefined {
     const deaths: Deaths[] | undefined = getData(state)?.deaths
     if (deaths === undefined) {
         return undefined
@@ -383,7 +428,7 @@ export function getDeathsChartDataCumulative(state: AppState): [number, number][
     return data
 }
 
-export function getRecoveredChartDataCumulative(state: AppState): [number, number][] | undefined {
+export function getRecoveredChartDataCumulative(state: AppState): ChartData[] | undefined {
     const recovered: Recovered[] | undefined = getData(state)?.recovered
     if (recovered === undefined) {
         return undefined
@@ -513,12 +558,12 @@ function getOldestDate(state: AppState): string | undefined {
     return oldestDate
 }
 
-function generateMissingDates(state: AppState, data: any, cumulative: boolean = false): [number, number][] {
+function generateMissingDates(state: AppState, data: any, cumulative: boolean = false): ChartData[] {
     const cases = data
     const casesCount = data.length
-    const casesByDay: [number, number][] = []
+    const casesByDay: ChartData[] = []
 
-    const generatedDates: [number, number][] = []
+    const generatedDates: ChartData[] = []
     const todaysDate = new Date().toISOString()
     let oldestDate = getOldestDate(state)
 
@@ -532,10 +577,10 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
         let dateAlreadyProcessed = false
 
         for (let i = 0; i < processedDatesCount; i++) {
-            const currentMilliseconds = casesByDay[i][0]
+            const currentMilliseconds = casesByDay[i].unixMilliseconds
 
             if (currentMilliseconds === milliseconds) {
-                casesByDay[i][1] = casesByDay[i][1] + 1
+                casesByDay[i].value = casesByDay[i].value + 1
                 dateAlreadyProcessed = true
                 break
             }
@@ -543,7 +588,10 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
 
         // If not store it
         if (!dateAlreadyProcessed) {
-            casesByDay.push([milliseconds, 1])
+            casesByDay.push({
+                unixMilliseconds: milliseconds, 
+                value: 1,
+            })
         }
     }
 
@@ -553,7 +601,10 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
 
     for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
         const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
-        generatedDates.push([currentMilliseconds, 0])
+        generatedDates.push({
+            unixMilliseconds: currentMilliseconds, 
+            value: 0,
+        })
     }
 
     // Assign the data to the generated dates
@@ -561,25 +612,25 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
         let caseFoundOnDate = false
 
         for (let j = 0; j < casesByDay.length; j++) {
-            const currentCaseDate = casesByDay[j][0]
-            if (currentCaseDate === generatedDates[i][0]) {
+            const currentCaseDate = casesByDay[j].unixMilliseconds
+            if (currentCaseDate === generatedDates[i].unixMilliseconds) {
                 caseFoundOnDate = true
 
                 if (cumulative) {
                     if (i > 0) {
-                        generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1] + casesByDay[j][1]
+                        generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value + casesByDay[j].value
                     } else {
-                        generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1]
+                        generatedDates[i].value = generatedDates[i].value + casesByDay[j].value
                     }
                 } else {
-                    generatedDates[i][1] = generatedDates[i][1] + casesByDay[j][1]
+                    generatedDates[i].value = generatedDates[i].value + casesByDay[j].value
                 }
             }
         }
 
         if (cumulative) {
             if (i > 0 && !caseFoundOnDate) {
-                generatedDates[i][1] = generatedDates[i][1] + generatedDates[i - 1][1]
+                generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value
             }
         }
     }

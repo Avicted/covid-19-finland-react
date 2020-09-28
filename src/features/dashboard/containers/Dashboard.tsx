@@ -38,6 +38,7 @@ import {
 import { HcdTestData } from '../../../entities/HcdTestData'
 import { FinnishCoronaData } from '../../../entities/FinnishCoronaData'
 import { ThlTestData } from '../../../entities/ThlTestData'
+import { ChartData } from '../../../entities/ChartData'
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -67,8 +68,8 @@ interface DashboardProps {
     totalTested: number
     percentageOfPopulationTested: number | string
     changeToday: string
-    testsChartData: [number, number][] | undefined
-    testsChartDataCumulative: [number, number][] | undefined
+    testsChartData: ChartData[] | undefined
+    testsChartDataCumulative: ChartData[] | undefined
 }
 
 class Dashboard extends Component<DashboardProps> {

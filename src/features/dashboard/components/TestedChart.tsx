@@ -3,9 +3,6 @@ import {
     Card,
     Typography,
     CardContent,
-    Button,
-    Menu,
-    MenuItem,
     Theme,
     StyleRules,
     createStyles,
@@ -16,6 +13,7 @@ import { connect } from 'react-redux'
 import { AppState } from '../../../framework/store/rootReducer'
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
+import { ChartData } from '../../../entities/ChartData'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -43,7 +41,7 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
 interface TestedChartProps {
     classes: Record<string, string>;
     title: string;
-    tests: any;
+    tests: ChartData[] | undefined;
 }
 
 interface TestedChartPropsState {
@@ -62,7 +60,7 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
             colors: ['rgba(255, 213, 79, 1)'],
             chart: {
                 id: 'cases-by-day',
-                type: 'area',
+                type: 'bar',
                 fontFamily: 'Roboto',
                 background: theme.palette.background.paper,
                 stacked: false,
@@ -112,27 +110,7 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    columnWidth: '90%',
-                },
-            },
-            stroke: {
-                show: true,
-                curve: 'straight',
-                colors: undefined,
-                width: [2, 2, 2],
-                dashArray: [0, 0, 0],
-            },
-            fill: {
-                colors: undefined,
-                opacity: 0.1,
-                type: 'gradient',
-                gradient: {
-                    shade: 'dark',
-                    type: 'vertical',
-                    shadeIntensity: 0.5,
-                    inverseColors: true,
-                    opacityFrom: 0,
-                    opacityTo: 0.1,
+                    columnWidth: '100%',
                 },
             },
             dataLabels: {
@@ -154,37 +132,9 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
         series: [
             {
                 name: 'Tests',
-                data: this.props.tests,
+                data: this.props.tests?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
             },
         ],
-    }
-
-    handleChartTypeSelection(chartType: any) {
-        let fill: any = this.state.options.fill
-
-        if (chartType === 'line') {
-            fill = {
-                ...this.state.options.fill,
-                type: 'solid',
-            }
-        } else {
-            fill = {
-                ...this.state.options.fill,
-                type: 'gradient',
-            }
-        }
-
-        this.setState({
-            anchorEl: null,
-            options: {
-                ...this.state.options,
-                chart: {
-                    ...this.state.options.chart,
-                    type: chartType,
-                },
-                fill: fill,
-            },
-        })
     }
 
     handleClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -201,8 +151,6 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
 
     render() {
         const { classes, title } = this.props
-        const { type } = this.state.options.chart
-
         return (
             <div>
                 <Card className={classes.card}>
@@ -210,45 +158,6 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
                         <Typography className={classes.title} gutterBottom>
                             {title}
                         </Typography>
-                        <Button
-                            className={classes.chartTypeMenuButton}
-                            aria-controls="simple-menu"
-                            aria-haspopup="true"
-                            size="small"
-                            color="primary"
-                            onClick={(e) => this.handleClick(e)}
-                        >
-                            Chart style
-                        </Button>
-                        <Menu
-                            id="simple-menu"
-                            anchorEl={this.state.anchorEl}
-                            keepMounted
-                            open={Boolean(this.state.anchorEl)}
-                            onClose={(e) => this.handleClose(e)}
-                        >
-                            <MenuItem
-                                selected={type === 'area' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('area')}
-                            >
-                                Area
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'line' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('line')}
-                            >
-                                Line
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'bar' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('bar')}
-                            >
-                                Bar
-                            </MenuItem>
-                        </Menu>
                         <div className={classes.chart}>
                             <ReactApexChart
                                 options={this.state.options}

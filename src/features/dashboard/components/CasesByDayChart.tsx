@@ -3,9 +3,6 @@ import {
     Card,
     Typography,
     CardContent,
-    Button,
-    Menu,
-    MenuItem,
     Theme,
     StyleRules,
     createStyles,
@@ -13,10 +10,11 @@ import {
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
 import { connect } from 'react-redux'
-import { getConfirmedChartData, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
+import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
 import { AppState } from '../../../framework/store/rootReducer'
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
+import { ChartData } from '../../../entities/ChartData'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -43,9 +41,10 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
 
 interface CasesByDayChartProps {
     classes: Record<string, string>;
-    confirmed: [number, number][] | undefined; 
-    recovered:[number, number][] | undefined;
-    deaths: [number, number][] | undefined;
+    confirmedChartDataSevenDaysRollingAverage: ChartData[] | undefined;
+    confirmed: ChartData[] | undefined; 
+    recovered: ChartData[] | undefined;
+    deaths: ChartData[] | undefined;
 }
 
 interface CasesByDayChartState {
@@ -62,7 +61,8 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 mode: 'dark',
             },
             colors: [
-                'rgba( 206, 147, 216, 1)', 
+                'rgba(255, 255, 255, 1)', 
+                'rgba(106, 73, 156, 1)', 
                 'rgba(129, 199, 132, 1)', 
                 'rgba(229, 115, 115, 1)',
             ],
@@ -72,9 +72,6 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 fontFamily: 'Roboto',
                 background: theme.palette.background.paper,
                 stacked: false,
-                animations: {
-                    enabled: false,
-                },
                 toolbar: {
                     show: true,
                     tools: {
@@ -101,6 +98,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                         dashArray: 3,
                     },
                 },
+                tickPlacement: 'on',
             },
             yaxis: {
                 labels: {
@@ -118,28 +116,15 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    columnWidth: '60%',
+                    columnWidth: '100%',
                 },
             },
             stroke: {
                 show: true,
                 curve: 'straight',
                 colors: undefined,
-                width: [2, 2, 2],
-                dashArray: [0, 0, 0],
-            },
-            fill: {
-                colors: undefined,
-                opacity: 0.1,
-                type: 'fill',
-                gradient: {
-                    shade: 'dark',
-                    type: 'vertical',
-                    shadeIntensity: 0.5,
-                    inverseColors: true,
-                    opacityFrom: 0,
-                    opacityTo: 0.1,
-                },
+                width: 3,
+                dashArray: [0],
             },
             dataLabels: {
                 enabled: false,
@@ -159,46 +144,26 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
         },
         series: [
             {
-                name: 'New infections',
-                data: this.props.confirmed,
+                name: 'Confirmed cases: 7 days rolling average',
+                data: this.props.confirmedChartDataSevenDaysRollingAverage?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
+                type: 'line',
+            },
+            {
+                name: 'Confirmed cases',
+                data: this.props.confirmed?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
+                type: 'bar',
             },
             {
                 name: 'Recovered',
-                data: this.props.recovered,
+                data: this.props.recovered?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
+                type: 'bar',
             },
             {
                 name: 'Deaths',
-                data: this.props.deaths,
+                data: this.props.deaths?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
+                type: 'bar',
             },
         ],
-    }
-
-    handleChartTypeSelection(chartType: any) {
-        let fill: any = this.state.options.fill
-
-        if (chartType === 'area') {
-            fill = {
-                ...this.state.options.fill,
-                type: 'gradient',
-            }
-        } else {
-            fill = {
-                ...this.state.options.fill,
-                type: 'fill',
-            }
-        }
-
-        this.setState({
-            anchorEl: null,
-            options: {
-                ...this.state.options,
-                chart: {
-                    ...this.state.options.chart,
-                    type: chartType,
-                },
-                fill: fill,
-            },
-        })
     }
 
     handleClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -215,8 +180,6 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
 
     render() {
         const { classes } = this.props
-        const { type } = this.state.options.chart
-
         return (
             <div>
                 <Card className={classes.card}>
@@ -224,45 +187,6 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                         <Typography className={classes.title} gutterBottom>
                             Cases by day
                         </Typography>
-                        <Button
-                            className={classes.chartTypeMenuButton}
-                            aria-controls="simple-menu"
-                            aria-haspopup="true"
-                            size="small"
-                            color="primary"
-                            onClick={(e) => this.handleClick(e)}
-                        >
-                            Chart style
-                        </Button>
-                        <Menu
-                            id="simple-menu"
-                            anchorEl={this.state.anchorEl}
-                            keepMounted
-                            open={Boolean(this.state.anchorEl)}
-                            onClose={(e) => this.handleClose(e)}
-                        >
-                            <MenuItem
-                                selected={type === 'area' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('area')}
-                            >
-                                Area
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'line' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('line')}
-                            >
-                                Line
-                            </MenuItem>
-                            <MenuItem
-                                selected={type === 'bar' ? true : false}
-                                dense
-                                onClick={() => this.handleChartTypeSelection('bar')}
-                            >
-                                Bar
-                            </MenuItem>
-                        </Menu>
                         <div className={classes.chart}>
                             <ReactApexChart
                                 options={this.state.options}
@@ -280,6 +204,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
 }
 
 const mapStatesToProps = (state: AppState) => ({
+    confirmedChartDataSevenDaysRollingAverage: getConfirmedChartDataSevenDaysRollingAverage(state),
     confirmed: getConfirmedChartData(state),
     recovered: getRecoveredChartData(state),
     deaths: getDeathsChartData(state),

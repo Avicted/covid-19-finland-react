@@ -1,7 +1,7 @@
 import React from 'react'
-import { Typography, makeStyles, Box } from '@material-ui/core'
+import { Typography, makeStyles, Box, Theme } from '@material-ui/core'
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme: Theme) => ({
     wrapper: {
         textAlign: 'center',
         marginTop: 30,
@@ -12,13 +12,19 @@ const useStyles = makeStyles({
         fontWeight: 'inherit',
     },
     link: {
-        color: '#d81b60',
+        color: theme.palette.primary.main,
         textDecoration: 'none',
+        '&:hover': {
+            textDecoration: 'underline',
+            color: theme.palette.primary.light,
+        }
     },
-})
+}))
 
-function Footer() {
-    const classes = useStyles()
+interface FooterProps {}
+
+export const Footer: React.FunctionComponent<FooterProps> = () => {
+    const classes = useStyles();
 
     return (
         <div className={classes.wrapper}>
@@ -50,5 +56,3 @@ function Footer() {
         </div>
     )
 }
-
-export default Footer

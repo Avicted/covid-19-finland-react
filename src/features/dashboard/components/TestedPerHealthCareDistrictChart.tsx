@@ -31,9 +31,6 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
             marginBottom: 0,
             display: 'inline',
         },
-        chartTypeMenuButton: {
-            float: 'right',
-        },
         chart: {
             paddingTop: 14,
         },

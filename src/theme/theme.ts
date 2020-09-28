@@ -5,13 +5,13 @@ const theme = createMuiTheme({
         type: 'dark',
         background: {
             default: '#0c111f',
-            paper: '#121729',
+            paper: '#121929',
         },
         primary: {
-            main: '#d81b60',
+            main: '#7dc7ff',
         },
         secondary: {
-            main: '#9c27b0',
+            main: '#7d8bff',
         },
     },
 })
