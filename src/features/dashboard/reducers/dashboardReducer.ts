@@ -7,6 +7,10 @@ import { ThlTestData, ThlTestDataItem } from '../../../entities/ThlTestData'
 import { AppState } from '../../../framework/store/rootReducer'
 import { ChartData } from '../../../entities/ChartData'
 
+// @Note: we are not calculating the rolling average for the past 5 days, since the data for these days 
+// is still being added to by THL.
+const lastDaysToIgnore: number = 5;
+
 interface DashboardState {
     data: FinnishCoronaData | undefined
     loadingData: boolean
@@ -264,6 +268,29 @@ export function getConfirmedChartData(state: AppState): ChartData[] | undefined 
     return data
 }
 
+export function getConfirmedStillBeingUpdated(state: AppState): ChartData[] | undefined {
+    const confirmed: ChartData[] | undefined = getConfirmedChartData(state);
+    if (confirmed === undefined || confirmed.length <= lastDaysToIgnore) {
+        return undefined;
+    }
+
+    let confirmedStillBeingUpdated: ChartData[] = confirmed.map((dataPoint: ChartData, index: number) => {
+        if (index >= confirmed.length - lastDaysToIgnore) {
+            return {
+                unixMilliseconds: dataPoint.unixMilliseconds,
+                value: dataPoint.value,
+            }
+        } else {
+            return {
+                unixMilliseconds: dataPoint.unixMilliseconds,
+                value: null,
+            }
+        }
+    });
+
+    return confirmedStillBeingUpdated;
+}
+
 export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): ChartData[] | undefined {
     const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
     if (confirmed === undefined) {
@@ -277,10 +304,6 @@ export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): C
     const data = generateMissingDates(state, confirmed)
 
     const sevendaysRollingAverage: ChartData[] = [];
-
-    // @Note: we are not calculating the rolling average for the past 5 days, since the data for these days 
-    // if still being added to by THL.
-    const lastDaysToIgnore: number = 5;
 
     for (let i = 0; i < data.length; i++) {
         if (i < 6) {

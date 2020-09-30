@@ -19,6 +19,7 @@ import {
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
 import { ChartData } from '../../../entities/ChartData'
+import { purple } from '@material-ui/core/colors'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -64,7 +65,7 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
                 mode: 'dark',
             },
             colors: [
-                'rgba(106, 73, 156, 1)', 
+                purple[200],
                 'rgba(129, 199, 132, 1)', 
                 'rgba(229, 115, 115, 1)'
             ],

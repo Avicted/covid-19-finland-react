@@ -10,11 +10,12 @@ import {
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
 import { connect } from 'react-redux'
-import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
+import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getConfirmedStillBeingUpdated, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
 import { AppState } from '../../../framework/store/rootReducer'
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
 import { ChartData } from '../../../entities/ChartData'
+import { grey, purple } from '@material-ui/core/colors'
 
 const styles: (theme: Theme) => StyleRules<string> = () =>
     createStyles({
@@ -42,7 +43,8 @@ const styles: (theme: Theme) => StyleRules<string> = () =>
 interface CasesByDayChartProps {
     classes: Record<string, string>;
     confirmedChartDataSevenDaysRollingAverage: ChartData[] | undefined;
-    confirmed: ChartData[] | undefined; 
+    confirmed: ChartData[] | undefined;
+    confirmedStillBeingUpdated: ChartData[] | undefined;
     recovered: ChartData[] | undefined;
     deaths: ChartData[] | undefined;
 }
@@ -61,10 +63,9 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 mode: 'dark',
             },
             colors: [
-                'rgba(255, 255, 255, 1)', 
-                'rgba(106, 73, 156, 1)', 
-                'rgba(129, 199, 132, 1)', 
-                'rgba(229, 115, 115, 1)',
+                purple[200],
+                theme.palette.secondary.dark,
+                grey[500],
             ],
             chart: {
                 id: 'cases-by-day',
@@ -73,7 +74,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 background: theme.palette.background.paper,
                 stacked: false,
                 animations: {
-                    enabled: false,
+                    enabled: true,
                 },
                 toolbar: {
                     show: true,
@@ -101,7 +102,6 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                         dashArray: 3,
                     },
                 },
-                tickPlacement: 'on',
             },
             yaxis: {
                 labels: {
@@ -157,6 +157,12 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 type: 'bar',
             },
             {
+                name: 'Confirmed cases still being updated',
+                data: this.props.confirmedStillBeingUpdated?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
+                type: 'bar',
+            }
+            // @Note: we are not displaying the following data for now, but we keep it around if we want to show it in the future.
+            /* {
                 name: 'Recovered',
                 data: this.props.recovered?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
                 type: 'bar',
@@ -165,7 +171,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 name: 'Deaths',
                 data: this.props.deaths?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
                 type: 'bar',
-            },
+            }, */
         ],
     }
 
@@ -209,6 +215,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
 const mapStatesToProps = (state: AppState) => ({
     confirmedChartDataSevenDaysRollingAverage: getConfirmedChartDataSevenDaysRollingAverage(state),
     confirmed: getConfirmedChartData(state),
+    confirmedStillBeingUpdated: getConfirmedStillBeingUpdated(state),
     recovered: getRecoveredChartData(state),
     deaths: getDeathsChartData(state),
 })
