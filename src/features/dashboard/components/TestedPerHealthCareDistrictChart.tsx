@@ -147,6 +147,19 @@ class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
                                 vertical: 3,
                             },
                         },
+                        dataLabels: {
+                            offsetY: 12,
+                            style: {
+                                fontSize: '11px',
+                            },
+                        },
+                        plotOptions: {
+                            bar: {
+                                dataLabels: {
+                                    orientation: 'vertical',
+                                },
+                            },
+                        },
                     },
                 },
             ],
