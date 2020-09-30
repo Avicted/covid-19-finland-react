@@ -265,17 +265,34 @@ export function getConfirmedChartData(state: AppState): ChartData[] | undefined 
     }
 
     const data = generateMissingDates(state, confirmed)
-    return data
+
+    let confirmedCases: ChartData[] = data.map((dataPoint: ChartData, index: number) => {
+        if (index >= data.length - lastDaysToIgnore) {
+            return {
+                unixMilliseconds: dataPoint.unixMilliseconds,
+                value: null,
+            }
+        } else {
+            return {
+                unixMilliseconds: dataPoint.unixMilliseconds,
+                value: dataPoint.value,
+            }
+        }
+    });
+
+    return confirmedCases;
 }
 
 export function getConfirmedStillBeingUpdated(state: AppState): ChartData[] | undefined {
-    const confirmed: ChartData[] | undefined = getConfirmedChartData(state);
+    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
     if (confirmed === undefined || confirmed.length <= lastDaysToIgnore) {
-        return undefined;
+        return undefined
     }
 
-    let confirmedStillBeingUpdated: ChartData[] = confirmed.map((dataPoint: ChartData, index: number) => {
-        if (index >= confirmed.length - lastDaysToIgnore) {
+    const data = generateMissingDates(state, confirmed)
+
+    let confirmedStillBeingUpdated: ChartData[] = data.map((dataPoint: ChartData, index: number) => {
+        if (index >= data.length - lastDaysToIgnore) {
             return {
                 unixMilliseconds: dataPoint.unixMilliseconds,
                 value: dataPoint.value,
