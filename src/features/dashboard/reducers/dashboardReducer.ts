@@ -209,8 +209,8 @@ export function getChangeToday(state: AppState): string {
     }
 
     // Calculate the increase in cases today compared to yesterday
-    const casesToday = generatedDates[generatedDates.length - 1].value
-    const casesYesterday = generatedDates[generatedDates.length - 2].value
+    const casesToday = generatedDates[generatedDates.length - 1].value as number;
+    const casesYesterday = generatedDates[generatedDates.length - 2].value as number;
     const total = casesToday - casesYesterday
     let increaseToday: string = ''
 
@@ -277,6 +277,11 @@ export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): C
     const data = generateMissingDates(state, confirmed)
 
     const sevendaysRollingAverage: ChartData[] = [];
+
+    // @Note: we are not calculating the rolling average for the past 5 days, since the data for these days 
+    // if still being added to by THL.
+    const lastDaysToIgnore: number = 5;
+
     for (let i = 0; i < data.length; i++) {
         if (i < 6) {
             sevendaysRollingAverage.push({
@@ -287,8 +292,17 @@ export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): C
             continue;
         }
 
+        if (i >= data.length - lastDaysToIgnore) {
+            sevendaysRollingAverage.push({
+                unixMilliseconds: data[i].unixMilliseconds,
+                value: null,
+            });
+
+            continue;
+        }
+
         const chartDataSlice: ChartData[] = data.slice(i - 6, i);
-        const valuesSlice: number[] = chartDataSlice.map((chartData) => chartData.value);
+        const valuesSlice: number[] = chartDataSlice.map((chartData) => chartData.value as number);
         const rollingAverage: number = valuesSlice.reduce((a, b) => (a + b)) / valuesSlice.length;
         sevendaysRollingAverage.push({
             unixMilliseconds: data[i].unixMilliseconds,
@@ -388,12 +402,12 @@ export function getTestsPerDayChartDataCumulative(state: AppState): ChartData[] 
             const milliseconds = new Date(date).getTime()
 
             if (currentMilliseconds === milliseconds) {
-                generatedDates[i].value = generatedDates[i].value + testCases[j].value
+                generatedDates[i].value = generatedDates[i].value as number + testCases[j].value as number;
             }
         }
 
         if (i > 0) {
-            generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value
+            generatedDates[i].value = (generatedDates[i].value as number) + (generatedDates[i - 1].value as number);
         }
     }
 
@@ -580,7 +594,7 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
             const currentMilliseconds = casesByDay[i].unixMilliseconds
 
             if (currentMilliseconds === milliseconds) {
-                casesByDay[i].value = casesByDay[i].value + 1
+                casesByDay[i].value = casesByDay[i].value as number + 1
                 dateAlreadyProcessed = true
                 break
             }
@@ -618,19 +632,19 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
 
                 if (cumulative) {
                     if (i > 0) {
-                        generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value + casesByDay[j].value
+                        generatedDates[i].value = (generatedDates[i].value as number) + (generatedDates[i - 1].value as number) + (casesByDay[j].value as number);
                     } else {
-                        generatedDates[i].value = generatedDates[i].value + casesByDay[j].value
+                        generatedDates[i].value = (generatedDates[i].value as number) + (casesByDay[j].value as number);
                     }
                 } else {
-                    generatedDates[i].value = generatedDates[i].value + casesByDay[j].value
+                    generatedDates[i].value = (generatedDates[i].value as number) + (casesByDay[j].value as number);
                 }
             }
         }
 
         if (cumulative) {
             if (i > 0 && !caseFoundOnDate) {
-                generatedDates[i].value = generatedDates[i].value + generatedDates[i - 1].value
+                generatedDates[i].value = (generatedDates[i].value as number) + (generatedDates[i - 1].value as number);
             }
         }
     }
