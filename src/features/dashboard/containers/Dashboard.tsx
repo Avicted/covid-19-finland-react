@@ -39,6 +39,7 @@ import { HcdTestData } from '../../../entities/HcdTestData'
 import { FinnishCoronaData } from '../../../entities/FinnishCoronaData'
 import { ThlTestData } from '../../../entities/ThlTestData'
 import { ChartData } from '../../../entities/ChartData'
+import { FinlandMap } from '../components/FinlandMap'
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -84,6 +85,7 @@ class Dashboard extends Component<DashboardProps> {
             changeToday,
             testsChartData,
             testsChartDataCumulative,
+            hcdTestData,
         } = this.props
 
         return (
@@ -136,6 +138,9 @@ class Dashboard extends Component<DashboardProps> {
                     </Grid>
                     <Grid item xs={12} lg={6}>
                         <TestedPerHealthCareDistrictChart />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FinlandMap hcdTestData={hcdTestData} />
                     </Grid>
                 </Grid>
             </Container>

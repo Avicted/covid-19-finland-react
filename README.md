@@ -19,6 +19,9 @@ https://covid.notasoftwaredevelopmentcompany.com/
 ### Data source Finland
 https://github.com/HS-Datadesk/koronavirus-avoindata
 
+### GeoJson source:
+https://github.com/Marantle/KoronaKartta
+
 ---
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

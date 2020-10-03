@@ -74,7 +74,7 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 background: theme.palette.background.paper,
                 stacked: false,
                 animations: {
-                    enabled: true,
+                    enabled: false,
                 },
                 toolbar: {
                     show: true,
