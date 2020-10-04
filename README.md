@@ -12,7 +12,7 @@ This project has also been setup with configurations to run the development envi
 
 ## View the app:
 
-https://covid.notasoftwaredevelopmentcompany.com/
+https://finlandcovid.com/
 
 ---
 
