@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, makeStyles, Theme, Typography } from '@material-ui/core'
 import { Map, TileLayer, GeoJSON, LayerGroup } from 'react-leaflet'
 import * as L from "leaflet";
-import finlandGeoJson from './../../../resources/geojson.json'
 import hcdCentroidGeoJson from './../../../resources/hcdcentroidgeo.json'
 import 'leaflet/dist/leaflet.css'
 import { HcdTestData } from '../../../entities/HcdTestData'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { MapInfo } from './MapInfo';
 
 const useStyles = makeStyles((theme: Theme) => ({
     card: {
@@ -57,9 +57,9 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
 }) => {
     const classes = useStyles(useStyles);
     const mapRef: any = useRef();
-    const [healthDistrictData, setHealthDistrictData] = useState<{ healthDistrictName: string, confirmed: number }[] | undefined>(undefined)
+    const centerOfDistrictsRef: any = useRef();
     const [tooltipsAdded, setTooltipsAdded] = useState<boolean>(false);
-    const zoomThreshold: number = 5;
+    const zoomThreshold: number = 4;
     const [startingCoords] = useState<Coords>({
         lat: 64.271179,
         lng: 26.939849,
@@ -67,56 +67,6 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
     });
     const position = (): [number, number] => {
         return [startingCoords.lat, startingCoords.lng];
-    }
-
-    // @Note: colors chosen as colorblind safe
-    const getColor = (value: number): string => {
-        return value > 1000 ? '#08589e' :
-               value > 500  ? '#2b8cbe' :
-               value > 200  ? '#4eb3d3' :
-               value > 100  ? '#7bccc4' :
-               value > 50   ? '#a8ddb5' :
-               value > 20   ? '#ccebc5' :
-               value > 10   ? '#f0f9e8' :
-               value <= 10  ? '#f0f9e8' :
-                              '#f0f9e8';
-    }
-
-    const healthDistrictMapStyle = (feature: any): any => {
-        if (!healthDistrictData) {
-            return;
-        }
-
-        const healthCareDistrict: string = feature.properties.healthCareDistrict;
-        const confirmed: number | undefined = healthDistrictData.find(district => district.healthDistrictName === healthCareDistrict)?.confirmed;
-
-        if (!confirmed) {
-            return;
-        }
-
-        return {
-            fillColor: getColor(confirmed),
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            
-            fillOpacity: 0.7
-        };
-    }
-
-    const formatData = (hcdTestData: HcdTestData): void => {
-        const result: { healthDistrictName: string, confirmed: number }[] = [];
-        Object.keys(hcdTestData).forEach((key) => {
-            const healthDistrictName: string = key;
-            const confirmed: number = hcdTestData[key].infected;
-            result.push({
-                healthDistrictName,
-                confirmed,
-            });
-        });
-
-        setHealthDistrictData(result);
     }
 
     useEffect(() => {
@@ -131,8 +81,7 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
         });
 
         L.Marker.prototype.options.icon = DefaultIcon;
-
-        formatData(hcdTestData)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hcdTestData]);
     
 
@@ -140,14 +89,21 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
         if (feature.properties && feature.properties.healthCareDistrict) {
             layer.bindPopup(feature.properties.healthCareDistrict);
             
-            if (!healthDistrictData || tooltipsAdded) {
+            if (!hcdTestData || tooltipsAdded) {
                 return;
             }
 
             const healthCareDistrict: string = feature.properties.healthCareDistrict;
-            const confirmed: number | undefined = healthDistrictData.find(district => district.healthDistrictName === healthCareDistrict)?.confirmed;
+            let infected: number | undefined = undefined;
 
-            layer.bindTooltip(`${confirmed === undefined ? 0 : confirmed}`, { 
+            for (const district in hcdTestData) {
+                if (district === healthCareDistrict) {
+                    infected = hcdTestData[district].infected;
+                    break;
+                }
+            }
+
+            layer.bindTooltip(`${infected === undefined ? 0 : infected}`, { 
                 permanent: true, 
                 interactive: false, 
                 offset: [0, 0],
@@ -178,31 +134,13 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
         }
     }
 
-    // @TODO: needs work, the center labels are triggering the mouseover
-    /* const onEachFeatureHealthDistrict = (feature: any, layer: L.Layer): void => {
-        layer.on('mouseover', () => {
-            console.log(`mouseover on layer: ${layer}`)
-            if (feature.properties && !feature.properties.centerPoint) {
-                layer.bindPopup(feature.properties.healthCareDistrict);
-    
-                if (!healthDistrictData || zoom <= zoomThreshold) {
-                    return;
-                }
-    
-                const healthCareDistrict: string = feature.properties.healthCareDistrict;
-                const confirmed: number | undefined = healthDistrictData.find(district => district.healthDistrictName === healthCareDistrict)?.confirmed;
-                layer.setPopupContent(`${feature.properties.healthCareDistrict}: ${confirmed === undefined ? 0 : confirmed}`)
-            }
-        })
-    } */
-
     return (
         <Card className={classes.card}>
             <CardContent className={classes.cardcontent}>
                 <Typography className={classes.title} gutterBottom>
                     Total infections by health care district map
                 </Typography>
-                {healthDistrictData !== undefined && (
+                {hcdTestData !== undefined && (
                     <Map
                         ref={mapRef}
                         center={position()} 
@@ -214,22 +152,14 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <LayerGroup>
-                            <GeoJSON
-                                key='health-districts'
-                                data={finlandGeoJson as any}
-                                style={healthDistrictMapStyle}
-                                // onEachFeature={onEachFeatureHealthDistrict}
-                            />
-                        </LayerGroup>
-                        <LayerGroup>
+                        <LayerGroup ref={centerOfDistrictsRef}>
                             <GeoJSON
                                 key='center-of-health-districts'
                                 data={hcdCentroidGeoJson as any}
-                                // style={this.geoJSONStyle}
                                 onEachFeature={createConfirmedMapLabels}
                             />
                         </LayerGroup>
+                        <MapInfo hcdTestData={hcdTestData} />
                     </Map>
                 )}
             </CardContent>
