@@ -125,13 +125,14 @@ export const MapInfo: React.FunctionComponent<MapInfoProps> = ({
             percentageInfected = ((infected / population) * 100).toFixed(2);
         }
         if (!props) {
-            return `<p>Hover over a healthcare district</p>`
+            return `<p>Hover over a healthcare district to view data</p>`
         }
 
         const content: string = `
             <h4 class=${classes.title}>Healthcare district information</h4>
+            <p class=${classes.dataParagraph}>District: <b>${healthCareDistrict}</b></p>
             <p class=${classes.dataParagraph}>Infections: <b>${infected === undefined ? 'Unknown' : infected}</b></p>
-            <p class=${classes.dataParagraph}> Population: <b>${population === undefined ? 'Unknown' : population}</b></p>
+            <p class=${classes.dataParagraph}>Population: <b>${population === undefined ? 'Unknown' : population}</b></p>
             <p class=${classes.dataParagraph}>Tested: <b>${tested === undefined ? 'Unknown' : tested}</b></p>
             <p class=${classes.dataParagraph}>Percentage tested: <b>${percentageTested === undefined ? 'Unknown' : percentageTested}%</b></p>
             <p class=${classes.dataParagraph}>Percentage infected: <b>${percentageInfected === undefined ? 'Unknown' : percentageInfected}%</b></p>
