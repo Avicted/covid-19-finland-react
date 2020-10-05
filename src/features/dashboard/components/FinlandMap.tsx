@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     mapContainer: {
         minHeight: 'calc(100% - 25px)',
     },
+    tilePane: {
+        filter: 'grayscale(1) contrast(1.2) brightness(0.5)', 
+    },
     leafletTooltip: {
         fontSize: '1.2rem',
         border: 'none',
@@ -151,6 +154,7 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
                         <TileLayer
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            className={classes.tilePane}
                         />
                         <LayerGroup ref={centerOfDistrictsRef}>
                             <GeoJSON

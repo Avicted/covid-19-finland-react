@@ -5,6 +5,7 @@ import finlandGeoJson from './../../../resources/geojson.json'
 import { makeStyles } from "@material-ui/core";
 import { HcdTestData } from "../../../entities/HcdTestData";
 import React from "react";
+import theme from "../../../theme/theme";
 
 const useStyles = makeStyles({
     title: {
@@ -63,9 +64,9 @@ export const MapInfo: React.FunctionComponent<MapInfoProps> = ({
 
             layer.setStyle({
                 weight: 3,
-                color: 'white',
+                color: theme.palette.warning.main,
                 dashArray: '',
-                fillOpacity: 0.7
+                fillOpacity: 0.8
             });
 
             if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -170,7 +171,7 @@ export const MapInfo: React.FunctionComponent<MapInfoProps> = ({
         }
 
         if (!infected) {
-            return;
+            infected = 0;
         }
 
         return {
