@@ -17,27 +17,15 @@ import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareD
 import { AppState } from '../../../framework/store/rootReducer'
 import {
     getChangeToday,
-    getData,
-    getHcdTestData,
-    getLoadingData,
-    getLoadingDataError,
-    getLoadingHcdTestData,
-    getLoadingHcdTestDataError,
-    getLoadingThlTestData,
-    getLoadingThlTestDataError,
     getPercentageOfPopulationTested,
     getTestsPerDayChartData,
     getTestsPerDayChartDataCumulative,
-    getThlTestData,
     getTotalDeaths,
     getTotalInfected,
     getTotalPopulation,
     getTotalRecovered,
     getTotalTested,
 } from '../reducers/dashboardReducer'
-import { HcdTestData } from '../../../entities/HcdTestData'
-import { FinnishCoronaData } from '../../../entities/FinnishCoronaData'
-import { ThlTestData } from '../../../entities/ThlTestData'
 import { ChartData } from '../../../entities/ChartData'
 import { FinlandMap } from '../components/FinlandMap'
 
@@ -50,17 +38,6 @@ const styles = (theme: Theme) =>
 
 interface DashboardProps {
     classes: Record<string, string>
-    finnishCoronaData: FinnishCoronaData | undefined
-    loadingFinnishCoronaData: boolean
-    loadingFinnishCoronaDataError: string | undefined
-
-    hcdTestData: HcdTestData | undefined
-    loadingHcdTestData: boolean
-    loadingHcdTestDataError: string | undefined
-
-    thlTestData: ThlTestData | undefined
-    loadingThlTestData: boolean
-    loadingThlTestDataError: string | undefined
 
     totalRecovered: number | undefined
     totalDeaths: number | undefined
@@ -85,7 +62,6 @@ class Dashboard extends Component<DashboardProps> {
             changeToday,
             testsChartData,
             testsChartDataCumulative,
-            hcdTestData,
         } = this.props
 
         return (
@@ -140,7 +116,7 @@ class Dashboard extends Component<DashboardProps> {
                         <TestedPerHealthCareDistrictChart />
                     </Grid>
                     <Grid item xs={12}>
-                        <FinlandMap hcdTestData={hcdTestData} />
+                        <FinlandMap />
                     </Grid>
                 </Grid>
             </Container>
@@ -150,18 +126,6 @@ class Dashboard extends Component<DashboardProps> {
 
 const mapStateToProps = (state: AppState) => {
     return {
-        finnishCoronaData: getData(state),
-        loadingFinnishCoronaData: getLoadingData(state),
-        loadingFinnishCoronaDataError: getLoadingDataError(state),
-
-        hcdTestData: getHcdTestData(state),
-        loadingHcdTestData: getLoadingHcdTestData(state),
-        loadingHcdTestDataError: getLoadingHcdTestDataError(state),
-
-        thlTestData: getThlTestData(state),
-        loadingThlTestData: getLoadingThlTestData(state),
-        loadingThlTestDataError: getLoadingThlTestDataError(state),
-
         totalRecovered: getTotalRecovered(state),
         totalDeaths: getTotalDeaths(state),
         totalInfected: getTotalInfected(state),

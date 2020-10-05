@@ -29,24 +29,24 @@ export const Footer: React.FunctionComponent<FooterProps> = () => {
     return (
         <div className={classes.wrapper}>
             <Box fontWeight="fontWeightRegular">
-                <Typography className={classes.text} variant="subtitle2" align="center" gutterBottom>
+                <Typography className={classes.text} variant="body1" align="center" gutterBottom>
                     <a className={classes.link} href="https://github.com/Avicted/covid-19-finland-react">
                         Source code
                     </a>
                 </Typography>
-                <Typography className={classes.text} variant="subtitle2" align="center" gutterBottom>
+                <Typography className={classes.text} variant="body1" align="center" gutterBottom>
                     <a className={classes.link} href="https://github.com/HS-Datadesk/koronavirus-avoindata">
                         Finland data source
                     </a>{' '}
                     | Helsingin Sanomat
                 </Typography>
-                <Typography className={classes.text} variant="subtitle2" align="center" gutterBottom>
+                <Typography className={classes.text} variant="body1" align="center" gutterBottom>
                     <a className={classes.link} href="https://ourworldindata.org/coronavirus-source-data">
                         Global data source
                     </a>{' '}
                     | World Health Organization (WHO)
                 </Typography>
-                <Typography className={classes.text} variant="subtitle2" align="center" gutterBottom>
+                <Typography className={classes.text} variant="body1" align="center" gutterBottom>
                     Developed by:{' '}
                     <a className={classes.link} href="https://twitter.com/Victoranderssen">
                         Victor Anderssén

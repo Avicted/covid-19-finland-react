@@ -8,10 +8,13 @@ import { HcdTestData } from '../../../entities/HcdTestData'
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import { MapInfo } from './MapInfo';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../framework/store/rootReducer';
+import { getHcdTestData } from '../reducers/dashboardReducer';
 
 const useStyles = makeStyles((theme: Theme) => ({
     card: {
-        minHeight: 800,
+        minHeight: 700,
         display: 'flex',
         flexDirection: 'row',
     },
@@ -52,14 +55,11 @@ type Coords = {
     zoom?: number,
 };
 
-interface FinlandMapProps {
-    hcdTestData: HcdTestData | undefined
-}
+interface FinlandMapProps {}
 
-export const FinlandMap: React.FunctionComponent<FinlandMapProps> = ({
-    hcdTestData,
-}) => {
+export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
     const classes = useStyles(useStyles);
+    const hcdTestData: HcdTestData | undefined = useSelector((state: AppState) => getHcdTestData(state));
     const mapRef: any = useRef();
     const centerOfDistrictsRef: any = useRef();
     const [tooltipsAdded, setTooltipsAdded] = useState<boolean>(false);

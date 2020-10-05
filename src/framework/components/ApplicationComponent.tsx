@@ -53,11 +53,8 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
     constructor(props: Readonly<ApplicationComponentProps>) {
         super(props)
         this.shouldComponentRender = this.shouldComponentRender.bind(this)
-    }
-
-    componentDidMount() {
         const { onFetchData, onFetchHcdTestData, onFetchThlData } = this.props
-
+    
         onFetchData()
         onFetchHcdTestData()
         onFetchThlData()
@@ -97,7 +94,12 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
                 </main>
             )
         } else {
-            content = <main className={classes.main}>{children}</main>
+            content = (
+                <>
+                    <main className={classes.main}>{children}</main>
+                    <Footer />
+                </>
+            );
         }
 
         return (
@@ -105,7 +107,6 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
                     {content}
-                    <Footer />
                 </ThemeProvider>
             </div>
         )

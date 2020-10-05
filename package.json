@@ -20,7 +20,7 @@
     "@types/react-leaflet": "^2.5.2",
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.5",
-    "apexcharts": "^3.21.0",
+    "apexcharts": "^3.22.0",
     "fontsource-roboto": "^3.0.3",
     "history": "^5.0.0",
     "immer": "^7.0.9",
