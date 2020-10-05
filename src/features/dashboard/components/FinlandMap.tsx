@@ -31,12 +31,13 @@ const useStyles = makeStyles((theme: Theme) => ({
         filter: 'grayscale(1) contrast(1.2) brightness(0.5)', 
     },
     leafletTooltip: {
-        fontSize: '1.2rem',
+        fontSize: '1.4rem',
         border: 'none',
-        fontFamily: 'monospace',
+        fontFamily: 'Roboto',
         fontWeight: 500,
         boxShadow: 'none',
-        color: 'black',
+        textShadow: '1px 1px 2px black',
+        color: 'white',
         backgroundColor: 'transparent',
     },
     markerIcon: {
