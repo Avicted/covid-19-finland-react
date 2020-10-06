@@ -119,6 +119,11 @@ class TestedChart extends Component<TestedChartProps, TestedChartPropsState> {
             tooltip: {
                 shared: true,
                 followCursor: true,
+                y: {
+                    formatter: function (value: number) {
+                        return value;
+                    },
+                },
             },
             legend: {
                 show: true,

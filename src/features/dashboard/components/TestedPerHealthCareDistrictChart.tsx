@@ -168,6 +168,11 @@ class TestedPerHealthCareDistrictChart extends Component<Props, IState> {
                 x: {
                     show: false,
                 },
+                y: {
+                    formatter: function (value: number) {
+                        return value;
+                    },
+                },
             },
         },
         series: this.props.series,

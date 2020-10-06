@@ -150,6 +150,11 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
             tooltip: {
                 shared: true,
                 followCursor: true,
+                y: {
+                    formatter: function (value: number) {
+                        return value;
+                    },
+                },
             },
             legend: {
                 show: true,
@@ -162,7 +167,7 @@ class CasesByDayChartCumulativeChart extends Component<CasesByDayChartCumulative
         },
         series: [
             {
-                name: 'New infections',
+                name: 'Infections',
                 data: this.props.confirmed?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
             },
             {

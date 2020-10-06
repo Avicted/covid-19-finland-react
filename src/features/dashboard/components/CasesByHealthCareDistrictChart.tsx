@@ -169,6 +169,11 @@ class CasesByHealthCareDistrictChart extends Component<CasesByHealthCareDistrict
                 x: {
                     show: false,
                 },
+                y: {
+                    formatter: function (value: number) {
+                        return value;
+                    },
+                },
             },
         },
         series: this.props.series,
