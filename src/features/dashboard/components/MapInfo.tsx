@@ -142,17 +142,15 @@ export const MapInfo: React.FunctionComponent<MapInfoProps> = ({
         return content;
     }
 
-    // @Note: colors chosen as colorblind safe
     const getColor = (value: number): string => {
-        return value > 1000 ? '#08589e' :
-            value > 500 ? '#2b8cbe' :
-            value > 200 ? '#4eb3d3' :
-            value > 100 ? '#7bccc4' :
-            value > 50  ? '#a8ddb5' :
-            value > 20  ? '#ccebc5' :
-            value > 10  ? '#f0f9e8' :
-            value <= 10 ? '#f0f9e8' :
-                          '#f0f9e8';
+        return value > 10000 ? '#800026' :
+            value > 5000     ? '#BD0026' :
+            value > 2000     ? '#E31A1C' :
+            value > 1000     ? '#FC4E2A' :
+            value > 500      ? '#FD8D3C' :
+            value > 200      ? '#FEB24C' :
+            value > 100      ? '#FED976' :
+                               '#FFEDA0';
     }
 
     const healthDistrictMapStyle = (feature: any): any => {
