@@ -194,7 +194,7 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
                         return;
                     }
 
-                    if (feature.properties) {
+                    if (!feature.properties) {
                         return;
                     }
 
