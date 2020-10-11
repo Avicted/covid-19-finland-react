@@ -1,5 +1,5 @@
 ## Description
-React web app that displays data about COVID-19 cases in Finland.
+React web app that displays COVID-19 data for Finland.
 
 ---
 
@@ -8,7 +8,26 @@ Install Nodejs LTS and run:
 ### `npm install`
 ### `npm start`
 
-This project has also been setup with configurations to run the development environment inside of docker using the Visual Studio Code remote containers extension.
+Note: This project has also been setup with configurations to run the development environment inside of docker using the Visual Studio Code remote containers extension.
+
+Learn more about remote containers at: https://code.visualstudio.com/docs/remote/containers
+
+---
+
+## .env
+rename to .env and fill in the variables
+
+```
+# Local data is stored in /src/resources, primarly used in development so that the live servers are not spammed with requests during hotreloading.
+REACT_APP_USE_LIVE_DATA_API=false
+
+# Create an account at: https://www.mapbox.com/ and read their documentation to acquire the needed variables.
+REACT_APP_MAPBOX_TOKEN=<token_here>
+REACT_APP_MAPBOX_STYLE_URL=<mapbox://styles/{id}/{syle_id}>
+REACT_APP_MAPBOX_ID=<mapbox_user_id>
+```
+
+---
 
 ## View the app:
 

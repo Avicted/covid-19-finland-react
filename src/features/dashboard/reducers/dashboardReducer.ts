@@ -1,6 +1,6 @@
 import { DashboardActions, DashboardActionTypes } from '../actions/dataActions'
 import produce from 'immer'
-import moment from 'moment'
+import { subDays, isBefore, isAfter, eachDayOfInterval, getUnixTime, parseISO, formatISO } from 'date-fns'
 import { Confirmed, Deaths, FinnishCoronaData, Recovered } from '../../../entities/FinnishCoronaData'
 import { HcdTestData } from '../../../entities/HcdTestData'
 import { ThlTestData, ThlTestDataItem } from '../../../entities/ThlTestData'
@@ -15,6 +15,7 @@ interface DashboardState {
     data: FinnishCoronaData | undefined
     loadingData: boolean
     loadingDataError: string | undefined
+    oldestDate: Date | undefined
 
     hcdTestData: HcdTestData | undefined
     loadingHcdTestData: boolean
@@ -29,6 +30,7 @@ const initialState: DashboardState = {
     data: undefined,
     loadingData: false,
     loadingDataError: undefined,
+    oldestDate: undefined,
 
     hcdTestData: undefined,
     loadingHcdTestData: false,
@@ -50,6 +52,7 @@ export function dashboardReducer(state: DashboardState = initialState, action: D
             return produce(state, (draft) => {
                 draft.loadingData = false
                 draft.data = action.data
+                draft.oldestDate = getOldestDate(action.data.confirmed);
             })
         case DashboardActionTypes.FetchDataError:
             return produce(state, (draft) => {
@@ -143,90 +146,32 @@ export function getTotalInfected(state: AppState): number | undefined {
     }
 }
 
-export function getChangeToday(state: AppState): string {
+export function getConfirmedPastSevenDays(state: AppState): number | undefined {
     const confirmedCases = getData(state)?.confirmed
     if (confirmedCases === undefined) {
-        return ''
+        return undefined;
     }
 
     const confirmedCasesCount = confirmedCases.length
 
     if (confirmedCasesCount <= 0) {
-        return ''
+        return undefined;
     }
 
-    const confirmedCasesByDay: any = []
+    // Count the confirmed cases backwards from yesterdays date for seven days
+    let confirmedCasesPastSevenDays: number = 0;
 
-    const generatedDates: ChartData[] = []
-    const todaysDate = new Date().toISOString()
-    let oldestDate = new Date().toISOString()
-
-    for (let i = 0; i < confirmedCasesCount; i++) {
-        const datetime = confirmedCases[i].date
-        const date = new Date(datetime).toISOString().substr(0, 10)
-        const milliseconds = new Date(date).getTime()
-
-        if (Date.parse(datetime) < Date.parse(oldestDate)) {
-            oldestDate = datetime
+    for (let i = confirmedCases.length - 1; i > 0; i--) {
+        if (isAfter(new Date(confirmedCases[i].date), subDays(new Date(), 8))) {
+            confirmedCasesPastSevenDays++;
         }
 
-        // Is the current date already stored? If so, increment the case count
-        const processedDatesCount = confirmedCasesByDay.length
-        let dateAlreadyProcessed = false
-
-        for (let i = 0; i < processedDatesCount; i++) {
-            const currentMilliseconds = confirmedCasesByDay[i][0]
-
-            if (currentMilliseconds === milliseconds) {
-                confirmedCasesByDay[i][1] = confirmedCasesByDay[i][1] + 1
-                dateAlreadyProcessed = true
-                break
-            }
-        }
-
-        // If not store it
-        if (!dateAlreadyProcessed) {
-            confirmedCasesByDay.push([milliseconds, 1])
+        if (isBefore(new Date(confirmedCases[i].date), subDays(new Date(), 8))) {
+            break;
         }
     }
-
-    // Generate missing dates
-    const today = moment(todaysDate).format('YYYY-MM-DD')
-    const oldest = moment(oldestDate).format('YYYY-MM-DD')
-
-    for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
-        const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
-        generatedDates.push({
-            unixMilliseconds: currentMilliseconds,
-            value: 0,
-        });
-    }
-
-    // Assign the data to the generated dates
-    for (let i = 0; i < generatedDates.length; i++) {
-        for (let j = 0; j < confirmedCasesByDay.length; j++) {
-            const currentCaseDate = confirmedCasesByDay[j][0]
-            if (currentCaseDate === generatedDates[i].unixMilliseconds) {
-                generatedDates[i].value = generatedDates[i].value + confirmedCasesByDay[j][1]
-            }
-        }
-    }
-
-    // Calculate the increase in cases today compared to yesterday
-    const casesToday = generatedDates[generatedDates.length - 1].value as number;
-    const casesYesterday = generatedDates[generatedDates.length - 2].value as number;
-    const total = casesToday - casesYesterday
-    let increaseToday: string = ''
-
-    if (total > 0) {
-        increaseToday = `+ ${casesToday - casesYesterday}`
-    } else if (total > 0) {
-        increaseToday = `- ${casesToday - casesYesterday}`
-    } else {
-        increaseToday = `${casesToday - casesYesterday}`
-    }
-
-    return increaseToday
+    
+    return confirmedCasesPastSevenDays;
 }
 
 export function getTotalPopulation(state: AppState): number {
@@ -265,6 +210,9 @@ export function getConfirmedChartData(state: AppState): ChartData[] | undefined 
     }
 
     const data = generateMissingDates(state, confirmed)
+    if (data === undefined) {
+        return undefined;
+    }
 
     let confirmedCases: ChartData[] = data.map((dataPoint: ChartData, index: number) => {
         if (index >= data.length - lastDaysToIgnore) {
@@ -290,6 +238,9 @@ export function getConfirmedStillBeingUpdated(state: AppState): ChartData[] | un
     }
 
     const data = generateMissingDates(state, confirmed)
+    if (data === undefined) {
+        return undefined;
+    } 
 
     let confirmedStillBeingUpdated: ChartData[] = data.map((dataPoint: ChartData, index: number) => {
         if (index >= data.length - lastDaysToIgnore) {
@@ -319,6 +270,9 @@ export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): C
     }
 
     const data = generateMissingDates(state, confirmed)
+    if (data === undefined) {
+        return undefined;
+    }
 
     const sevendaysRollingAverage: ChartData[] = [];
 
@@ -419,19 +373,32 @@ export function getTestsPerDayChartDataCumulative(state: AppState): ChartData[] 
         return undefined
     }
 
-    const todaysDate = new Date().toISOString()
-    const today = moment(todaysDate).format('YYYY-MM-DD')
-    const oldest = getOldestDate(state)
-    const generatedDates: ChartData[] = []
-
-    for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
-        const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
-        generatedDates.push({
-            unixMilliseconds: currentMilliseconds, 
-            value: 0,
-        })
+    const today: string = formatISO(Date.parse(new Date().toISOString()), { representation: 'date' });
+    if (state.dashboard.oldestDate === undefined) {
+        return undefined;
     }
 
+    const oldest: string = formatISO(Date.parse(state.dashboard.oldestDate.toISOString()), { representation: 'date' });
+    if (oldest === undefined) {
+        return undefined;
+    }
+
+    const generatedDates: ChartData[] = []
+
+    const dateRange: Date[] = eachDayOfInterval({
+        start: Date.parse(oldest),
+        end: Date.parse(today),
+    })
+
+    dateRange.forEach(date => {
+        const dateString: string = formatISO(Date.parse(date.toISOString()), { representation: 'date' });
+        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000; 
+        generatedDates.push({
+            unixMilliseconds: milliseconds,
+            value: 0,
+        })
+    })
+    
     // Assign the data to the generated dates
     for (let i = 0; i < generatedDates.length; i++) {
         const currentMilliseconds = generatedDates[i].unixMilliseconds
@@ -593,14 +560,13 @@ export function getTestsPerHealthCareDistrictChartData(state: AppState): any {
     }
 }
 
-function getOldestDate(state: AppState): string | undefined {
-    const confirmed: Confirmed[] | undefined = getData(state)?.confirmed
+function getOldestDate(confirmed: Confirmed[]): Date | undefined {
     if (confirmed === undefined) {
         return undefined
     }
 
     const confirmedCasesCount = confirmed.length
-    let oldestDate = new Date().toISOString()
+    let oldestDate: string = new Date().toISOString();
 
     for (let i = 0; i < confirmedCasesCount; i++) {
         const datetime = confirmed[i].date
@@ -609,28 +575,23 @@ function getOldestDate(state: AppState): string | undefined {
         }
     }
 
-    return oldestDate
+    return parseISO(oldestDate);
 }
 
-function generateMissingDates(state: AppState, data: any, cumulative: boolean = false): ChartData[] {
+function generateMissingDates(state: AppState, data: Confirmed[] | Deaths[] | Recovered[], cumulative: boolean = false): ChartData[] | undefined {
     const cases = data
     const casesCount = data.length
     const casesByDay: ChartData[] = []
 
-    const generatedDates: ChartData[] = []
-    const todaysDate = new Date().toISOString()
-    let oldestDate = getOldestDate(state)
-
     for (let i = 0; i < casesCount; i++) {
-        const datetime = cases[i].date
-        const date = new Date(datetime).toISOString().substr(0, 10)
-        const milliseconds = new Date(date).getTime()
+        const date: string = formatISO(Date.parse(cases[i].date), { representation: 'date' });
+        const milliseconds: number = getUnixTime(new Date(date)) * 1000; 
 
         // Is the current date already stored? If so, increment the case count
-        const processedDatesCount = casesByDay.length
+        const datesToProcess = casesByDay.length
         let dateAlreadyProcessed = false
 
-        for (let i = 0; i < processedDatesCount; i++) {
+        for (let i = 0; i < datesToProcess; i++) {
             const currentMilliseconds = casesByDay[i].unixMilliseconds
 
             if (currentMilliseconds === milliseconds) {
@@ -650,23 +611,39 @@ function generateMissingDates(state: AppState, data: any, cumulative: boolean = 
     }
 
     // Generate missing dates
-    const today = moment(todaysDate).format('YYYY-MM-DD')
-    const oldest = moment(oldestDate).format('YYYY-MM-DD')
+    const today: string = formatISO(Date.parse(new Date().toISOString()), { representation: 'date' });
+    if (state.dashboard.oldestDate === undefined) {
+        return undefined;
+    }
 
-    for (let m = moment(oldest); m.isSameOrBefore(today); m.add(1, 'days')) {
-        const currentMilliseconds = new Date(m.format('YYYY-MM-DD')).getTime()
+    const oldest: string = formatISO(Date.parse(state.dashboard.oldestDate.toISOString()), { representation: 'date' });
+    if (oldest === undefined) {
+        return undefined;
+    }
+
+    const generatedDates: ChartData[] = []
+
+    const dateRange: Date[] = eachDayOfInterval({
+        start: Date.parse(oldest),
+        end: Date.parse(today),
+    })
+
+    dateRange.forEach(date => {
+        const dateString: string = formatISO(Date.parse(date.toISOString()), { representation: 'date' });
+        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000; 
         generatedDates.push({
-            unixMilliseconds: currentMilliseconds, 
+            unixMilliseconds: milliseconds,
             value: 0,
         })
-    }
+    });
 
     // Assign the data to the generated dates
     for (let i = 0; i < generatedDates.length; i++) {
         let caseFoundOnDate = false
 
         for (let j = 0; j < casesByDay.length; j++) {
-            const currentCaseDate = casesByDay[j].unixMilliseconds
+            const currentCaseDate: number = casesByDay[j].unixMilliseconds
+
             if (currentCaseDate === generatedDates[i].unixMilliseconds) {
                 caseFoundOnDate = true
 

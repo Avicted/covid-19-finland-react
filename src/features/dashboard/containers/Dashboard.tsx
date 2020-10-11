@@ -16,7 +16,7 @@ import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistr
 import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareDistrictChart'
 import { AppState } from '../../../framework/store/rootReducer'
 import {
-    getChangeToday,
+    getConfirmedPastSevenDays,
     getPercentageOfPopulationTested,
     getTestsPerDayChartData,
     getTestsPerDayChartDataCumulative,
@@ -38,14 +38,13 @@ const styles = (theme: Theme) =>
 
 interface DashboardProps {
     classes: Record<string, string>
-
     totalRecovered: number | undefined
     totalDeaths: number | undefined
+    infectionsPastSevenDays: number | undefined;
     totalInfected: number | undefined
     totalPopulation: number
     totalTested: number
     percentageOfPopulationTested: number | string
-    changeToday: string
     testsChartData: ChartData[] | undefined
     testsChartDataCumulative: ChartData[] | undefined
 }
@@ -59,7 +58,7 @@ class Dashboard extends Component<DashboardProps> {
             totalTested,
             totalRecovered,
             totalDeaths,
-            changeToday,
+            infectionsPastSevenDays,
             testsChartData,
             testsChartDataCumulative,
         } = this.props
@@ -82,7 +81,7 @@ class Dashboard extends Component<DashboardProps> {
                         <KPICard title="Deaths" data={totalDeaths} color={red[300]} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Infections change today" data={changeToday} color={grey[200]} />
+                        <KPICard title="Infections past 7 days" data={infectionsPastSevenDays} color={grey[200]} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={2}>
                         <KPICard
@@ -128,11 +127,11 @@ const mapStateToProps = (state: AppState) => {
     return {
         totalRecovered: getTotalRecovered(state),
         totalDeaths: getTotalDeaths(state),
+        infectionsPastSevenDays: getConfirmedPastSevenDays(state),
         totalInfected: getTotalInfected(state),
         totalPopulation: getTotalPopulation(state),
         totalTested: getTotalTested(state),
         percentageOfPopulationTested: getPercentageOfPopulationTested(state),
-        changeToday: getChangeToday(state),
         testsChartData: getTestsPerDayChartData(state),
         testsChartDataCumulative: getTestsPerDayChartDataCumulative(state),
     }

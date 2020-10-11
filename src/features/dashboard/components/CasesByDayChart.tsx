@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core'
 import ReactApexChart from 'react-apexcharts'
 import { connect } from 'react-redux'
-import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getConfirmedStillBeingUpdated, getDeathsChartData, getRecoveredChartData } from '../reducers/dashboardReducer'
+import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getConfirmedStillBeingUpdated } from '../reducers/dashboardReducer'
 import { AppState } from '../../../framework/store/rootReducer'
 import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
@@ -45,8 +45,8 @@ interface CasesByDayChartProps {
     confirmedChartDataSevenDaysRollingAverage: ChartData[] | undefined;
     confirmed: ChartData[] | undefined;
     confirmedStillBeingUpdated: ChartData[] | undefined;
-    recovered: ChartData[] | undefined;
-    deaths: ChartData[] | undefined;
+    // recovered: ChartData[] | undefined;
+    // deaths: ChartData[] | undefined;
 }
 
 interface CasesByDayChartState {
@@ -216,8 +216,8 @@ const mapStatesToProps = (state: AppState) => ({
     confirmedChartDataSevenDaysRollingAverage: getConfirmedChartDataSevenDaysRollingAverage(state),
     confirmed: getConfirmedChartData(state),
     confirmedStillBeingUpdated: getConfirmedStillBeingUpdated(state),
-    recovered: getRecoveredChartData(state),
-    deaths: getDeathsChartData(state),
+    // recovered: getRecoveredChartData(state),
+    // deaths: getDeathsChartData(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
