@@ -189,6 +189,14 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
                 map.on('click', (event: mapboxgl.MapMouseEvent) => {
                     const features = map.queryRenderedFeatures(event.point);
                     const feature: any = features.find(feature => feature.layer.source === 'healthcare-districts');
+                    
+                    if (!feature) {
+                        return;
+                    }
+
+                    if (feature.properties) {
+                        return;
+                    }
 
                     if (!feature.properties.healthCareDistrict || !feature.layer.id) {
                         return;
