@@ -7,13 +7,13 @@ import red from '@material-ui/core/colors/red'
 import grey from '@material-ui/core/colors/grey'
 import amber from '@material-ui/core/colors/amber'
 import pink from '@material-ui/core/colors/pink'
-import CasesByDayChart from '../components/CasesByDayChart'
-import CasesByDayChartCumulativeChart from '../components/CasesByDayChartCumulative'
+import { CasesByDayChart } from '../components/CasesByDayChart'
+import { CasesByDayChartCumulativeChart } from '../components/CasesByDayChartCumulative'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-import TestedChart from '../components/TestedChart'
-import CasesByHealthCareDistrictChart from '../components/CasesByHealthCareDistrictChart'
-import TestedPerHealthCareDistrictChart from '../components/TestedPerHealthCareDistrictChart'
+import { TestedChart } from '../components/TestedChart'
+import { CasesByHealthCareDistrictChart } from '../components/CasesByHealthCareDistrictChart'
+import { TestedPerHealthCareDistrictChart } from '../components/TestedPerHealthCareDistrictChart'
 import { AppState } from '../../../framework/store/rootReducer'
 import {
     getConfirmedPastSevenDays,
@@ -115,7 +115,7 @@ class Dashboard extends Component<DashboardProps> {
                         <TestedPerHealthCareDistrictChart />
                     </Grid>
                     <Grid item xs={12}>
-                        <FinlandMap />
+                        {/* <FinlandMap /> */}
                     </Grid>
                 </Grid>
             </Container>

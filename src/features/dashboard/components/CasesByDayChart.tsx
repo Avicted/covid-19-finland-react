@@ -3,60 +3,202 @@ import {
     Card,
     Typography,
     CardContent,
-    Theme,
-    StyleRules,
-    createStyles,
-    withStyles,
+    makeStyles,
 } from '@material-ui/core'
-import ReactApexChart from 'react-apexcharts'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { getConfirmedChartData, getConfirmedChartDataSevenDaysRollingAverage, getConfirmedStillBeingUpdated } from '../reducers/dashboardReducer'
 import { AppState } from '../../../framework/store/rootReducer'
-import { Dispatch } from 'redux'
 import theme from '../../../theme/theme'
 import { ChartData } from '../../../entities/ChartData'
 import { grey, purple } from '@material-ui/core/colors'
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, TooltipPayload, TooltipProps, XAxis, YAxis } from 'recharts'
+import { format } from 'date-fns'
 
-const styles: (theme: Theme) => StyleRules<string> = () =>
-    createStyles({
-        cardcontent: {
-            '&:last-child': {
-                paddingBottom: 12,
+const useStyles = makeStyles({
+    cardcontent: {
+        '&:last-child': {
+            paddingBottom: 12,
+        },
+    },
+    card: {
+        minHeight: 300,
+    },
+    title: {
+        fontSize: 14,
+        marginBottom: 0,
+        display: 'inline',
+    },
+    chartTypeMenuButton: {
+        float: 'right',
+    },
+    chart: {
+        paddingTop: 14,
+    },
+    composedChart: {
+        fontFamily: 'Roboto',
+        '& .recharts-cartesian-axis-tick': {
+            fontFamily: 'Roboto',
+            fontSize: '0.8rem',
+            '& tspan': {
+                fill: 'white',
             },
         },
-        card: {
-            minHeight: 300,
+        '& .recharts-cartesian-grid-horizontal': {
+            '& line': {
+                stroke: '#495e8e',
+            },
         },
-        title: {
-            fontSize: 14,
-            marginBottom: 0,
-            display: 'inline',
+        '& .recharts-tooltip-wrapper': {
+            borderRadius: 5,
+            backgroundColor: '#0c111f',
+            minWidth: 100,
         },
-        chartTypeMenuButton: {
-            float: 'right',
-        },
-        chart: {
-            paddingTop: 14,
-        },
-    })
+    },
+    customTooltip: {
+        background: '#0c111f',
+        paddingLeft: 10,
+        paddingRight: 10,
+        fontSize: 12,
+        fontFamily: 'Roboto',
+    },
+    tooltipHeader: {
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    tooltipValue: {
+        marginTop: 5,
+        marginBottom: 5,
+    },
+})
 
-interface CasesByDayChartProps {
-    classes: Record<string, string>;
-    confirmedChartDataSevenDaysRollingAverage: ChartData[] | undefined;
-    confirmed: ChartData[] | undefined;
-    confirmedStillBeingUpdated: ChartData[] | undefined;
-    // recovered: ChartData[] | undefined;
-    // deaths: ChartData[] | undefined;
+interface CasesByDayChartProps { }
+
+export const CasesByDayChart: React.FunctionComponent<CasesByDayChartProps> = () => {
+    const classes = useStyles();
+    const confirmedChartDataSevenDaysRollingAverage: ChartData[] | undefined = useSelector((state: AppState) => getConfirmedChartDataSevenDaysRollingAverage(state));
+    const confirmed: ChartData[] | undefined = useSelector((state: AppState) => getConfirmedChartData(state));
+    const confirmedStillBeingUpdated: ChartData[] | undefined = useSelector((state: AppState) => getConfirmedStillBeingUpdated(state));
+
+    const chartData = (confirmedChartDataSevenDaysRollingAverage: ChartData[], confirmed: ChartData[], confirmedStillBeingUpdated: ChartData[]): any => {
+        const result: any = [];
+
+        for (let i = 0; i < confirmed.length; i++) {
+            const confirmedChartDataSevenDaysRollingAverageValue: number | undefined = confirmedChartDataSevenDaysRollingAverage.find((d: ChartData) => d.unixMilliseconds === confirmed[i].unixMilliseconds)?.value;
+            const confirmedStillBeingUpdatedValue: number | undefined = confirmedStillBeingUpdated.find((d: ChartData) => d.unixMilliseconds === confirmed[i].unixMilliseconds)?.value;
+
+            const dataPoint: any = {
+                unixMilliseconds: confirmed[i].unixMilliseconds,
+                confirmed: confirmed[i].value,
+                confirmedChartDataSevenDaysRollingAverage: confirmedChartDataSevenDaysRollingAverageValue === undefined ? 0 : confirmedChartDataSevenDaysRollingAverageValue,
+                confirmedStillBeingUpdated: confirmedStillBeingUpdatedValue === undefined ? 0 : confirmedStillBeingUpdatedValue,
+            }
+
+            result.push(dataPoint);
+        }
+
+        return result;
+    }
+
+    const renderTooltip = ({ active, payload, label }: TooltipProps): JSX.Element | null => {
+        if (active && payload !== undefined) {
+            const unixMilliseconds: number = payload[0].payload.unixMilliseconds;
+            return (
+                <div className={classes.customTooltip}>
+                    <p className={classes.tooltipHeader}>{`${format(new Date(unixMilliseconds), 'dd MMM yyyy')}`}</p>
+                    {payload.map((p: TooltipPayload, index: number) => (
+                        <p className={classes.tooltipValue} style={{ color: p.color }} key={index}>
+                            {p.name}: <b>{`${p.value}`}</b>
+                        </p>
+                    ))}
+                </div>
+            );
+        };
+
+        return null;
+    }
+
+    return (
+        <div>
+            <Card className={classes.card}>
+                <CardContent className={classes.cardcontent}>
+                    <Typography className={classes.title} gutterBottom>
+                        Cases by day
+                        </Typography>
+                    <div className={classes.chart}>
+                        {(confirmedChartDataSevenDaysRollingAverage !== undefined && confirmed !== undefined && confirmedStillBeingUpdated !== undefined) && (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <ComposedChart
+                                    data={chartData(confirmedChartDataSevenDaysRollingAverage, confirmed, confirmedStillBeingUpdated)}
+                                    margin={{
+                                        top: 0, right: 0, left: 0, bottom: 0,
+                                    }}
+                                    className={classes.composedChart}
+                                    // barCategoryGap='0%'
+                                    // barGap='0%'
+                                    barSize={200}
+                                >
+                                    <CartesianGrid
+                                        strokeDasharray="8 8"
+                                        vertical={false}
+                                    />
+                                    <XAxis
+                                        dataKey="unixMilliseconds"
+                                        tickFormatter={unixMilliseconds => format(new Date(unixMilliseconds), 'MMM yy')}
+                                        name="Date"
+                                        minTickGap={40}
+                                    />
+                                    <YAxis
+                                        tickFormatter={(value: number) => {
+                                            if (value >= 1000000) {
+                                                const result = (value / 1000000).toFixed(1)
+                                                return `${result}M`
+                                            }
+                                            else if (value >= 1000) {
+                                                const result = (value / 1000).toFixed(0)
+                                                return `${result}k`
+                                            } else {
+                                                return value
+                                            }
+                                        }}
+                                    />
+                                    <Tooltip content={renderTooltip} cursor={{fill: '#1d2842'}} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
+                                        formatter={(value, entry, index) => {
+                                            return value.charAt(0).toUpperCase() + value.slice(1);
+                                        }}
+                                    />
+
+                                    <Bar
+                                        dataKey="confirmed"
+                                        name="Confirmed"
+                                        fill={theme.palette.secondary.dark}
+                                    />
+                                    <Bar
+                                        dataKey="confirmedStillBeingUpdated"
+                                        name="Confirmed cases still being updated"
+                                        fill={grey[500]}
+                                    />
+                                    <Line
+                                        dataKey="confirmedChartDataSevenDaysRollingAverage"
+                                        name="Confirmed cases 7 days rolling average"
+                                        stroke={purple[200]}
+                                        strokeWidth={2}
+                                        dot={false}
+                                    />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
 }
 
-interface CasesByDayChartState {
-    options: any
-    series: any
-    anchorEl: any
-}
 
-class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByDayChartState> {
-    state = {
+/*
+state = {
         anchorEl: null,
         options: {
             theme: {
@@ -162,67 +304,6 @@ class CasesByDayChartView extends React.Component<CasesByDayChartProps, CasesByD
                 type: 'bar',
             }
             // @Note: we are not displaying the following data for now, but we keep it around if we want to show it in the future.
-            /* {
-                name: 'Recovered',
-                data: this.props.recovered?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
-                type: 'bar',
-            },
-            {
-                name: 'Deaths',
-                data: this.props.deaths?.map((chartData) => [chartData.unixMilliseconds, chartData.value]),
-                type: 'bar',
-            }, */
         ],
     }
-
-    handleClick(event: React.MouseEvent<HTMLButtonElement>) {
-        this.setState({
-            anchorEl: event.currentTarget,
-        })
-    }
-
-    handleClose(event: any) {
-        this.setState({
-            anchorEl: null,
-        })
-    }
-
-    render() {
-        const { classes } = this.props
-        return (
-            <div>
-                <Card className={classes.card}>
-                    <CardContent className={classes.cardcontent}>
-                        <Typography className={classes.title} gutterBottom>
-                            Cases by day
-                        </Typography>
-                        <div className={classes.chart}>
-                            <ReactApexChart
-                                options={this.state.options}
-                                series={this.state.series}
-                                type={this.state.options.chart.type as any}
-                                width="100%"
-                                height={300}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-}
-
-const mapStatesToProps = (state: AppState) => ({
-    confirmedChartDataSevenDaysRollingAverage: getConfirmedChartDataSevenDaysRollingAverage(state),
-    confirmed: getConfirmedChartData(state),
-    confirmedStillBeingUpdated: getConfirmedStillBeingUpdated(state),
-    // recovered: getRecoveredChartData(state),
-    // deaths: getDeathsChartData(state),
-})
-
-const mapDispatchToProps = (dispatch: Dispatch) => {
-    return {}
-}
-
-const connector = connect(mapStatesToProps, mapDispatchToProps)
-export default connector(withStyles(styles)(CasesByDayChartView))
+*/

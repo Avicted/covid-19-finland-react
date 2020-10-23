@@ -1,4 +1,4 @@
 export interface ChartData {
     unixMilliseconds: number;
-    value: number | null;
+    value: number | undefined;
 }
