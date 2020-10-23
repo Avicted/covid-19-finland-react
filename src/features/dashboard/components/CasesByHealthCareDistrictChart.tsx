@@ -1,218 +1,152 @@
-import React, { Component } from 'react'
+import React from 'react'
 import {
     Card,
     Typography,
     CardContent,
-    Theme,
-    StyleRules,
-    createStyles,
-    withStyles,
+    makeStyles,
 } from '@material-ui/core'
-import ReactApexChart from 'react-apexcharts'
-import { connect } from 'react-redux'
-import { Dispatch } from 'redux'
-import { getInfectionsByHealthCareDistrictChartData } from '../reducers/dashboardReducer'
+import { useSelector } from 'react-redux'
 import { AppState } from '../../../framework/store/rootReducer'
-import theme from '../../../theme/theme'
+import { getInfectionsByHealthCareDistrictChartData } from '../reducers/dashboardReducer'
+import { InfectionsByHealthCareDistrictChartData } from '../../../entities/InfectionsByHealthCareDistrictChartData'
+import { Bar, BarChart, CartesianGrid, Cell, Legend, LegendPayload, ResponsiveContainer, Tooltip, TooltipPayload, TooltipProps, YAxis } from 'recharts'
+import { getColor } from '../../../utils'
 
-const styles: (theme: Theme) => StyleRules<string> = () =>
-    createStyles({
-        cardcontent: {
-            '&:last-child': {
-                paddingBottom: 12,
+const useStyles = makeStyles({
+    cardcontent: {
+        '&:last-child': {
+            paddingBottom: 12,
+        },
+    },
+    card: {
+    },
+    title: {
+        fontSize: 14,
+        marginBottom: 0,
+        display: 'inline',
+    },
+    chart: {
+        paddingTop: 14,
+    },
+    barChart: {
+        fontFamily: 'Roboto',
+        '& .recharts-cartesian-axis-tick': {
+            fontFamily: 'Roboto',
+            fontSize: '0.8rem',
+            '& tspan': {
+                fill: 'white',
             },
         },
-        card: {
-            minHeight: 400,
-        },
-        title: {
-            fontSize: 14,
-            marginBottom: 0,
-            display: 'inline',
-        },
-        chart: {
-            paddingTop: 14,
-        },
-    })
-
-interface CasesByHealthCareDistrictChartProps {
-    classes: Record<string, string>;
-    series: any;
-    labels: any;
-}
-
-interface CasesByHealthCareDistrictChartState {
-    options: any
-    series: any
-    anchorEl: any
-}
-
-class CasesByHealthCareDistrictChart extends Component<CasesByHealthCareDistrictChartProps, CasesByHealthCareDistrictChartState> {
-    state = {
-        anchorEl: null,
-        options: {
-            theme: {
-                mode: 'dark',
-            },
-            colors: [
-                '#e57373',
-                '#f06292',
-                '#ba68c8',
-                '#9575cd',
-                '#7986cb',
-                '#64b5f6',
-                '#4fc3f7',
-                '#4dd0e1',
-                '#4db6ac',
-                '#81c784',
-                '#aed581',
-                '#dce775',
-                '#fff176',
-                '#ffd54f',
-                '#ffb74d',
-                '#ff8a65',
-                '#a1887f',
-            ],
-            chart: {
-                stacked: false,
-                background: theme.palette.background.paper,
-                type: 'bar',
-                animations: {
-                    enabled: false,
-                },
-                toolbar: {
-                    show: false,
-                },
-            },
-            dataLabels: {
-                enabled: true,
-                textAnchor: 'middle',
-                offsetY: -20,
-                style: {
-                    fontSize: '10px',
-                },
-                formatter: function (value: number) {
-                    if (value > 999) {
-                        const result = (value / 1000).toFixed(0)
-                        return `${result}k`
-                    } else {
-                        return value
-                    }
-                },
-            },
-            legend: {
-                show: true,
-                position: 'right',
-            },
-            grid: {
-                borderColor: '#525252',
-                strokeDashArray: 7,
-            },
-            xaxis: {
-                type: 'category',
-                categories: this.props.labels,
-                labels: {
-                    show: false,
-                },
-            },
-            yaxis: {
-                labels: {
-                    minWidth: 40,
-                    formatter: function (value: number) {
-                        if (value > 999) {
-                            const result = (value / 1000).toFixed(0)
-                            return `${result}k`
-                        } else {
-                            return value
-                        }
-                    },
-                },
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '100%',
-                    dataLabels: {
-                        position: 'top',
-                    },
-                },
-            },
-            responsive: [
-                {
-                    breakpoint: 1400,
-                    options: {
-                        legend: {
-                            show: true,
-                            position: 'bottom',
-                            itemMargin: {
-                                horizontal: 3,
-                                vertical: 3,
-                            },
-                        },
-                        dataLabels: {
-                            offsetY: 12,
-                            style: {
-                                fontSize: '11px',
-                            },
-                        },
-                        plotOptions: {
-                            bar: {
-                                dataLabels: {
-                                    orientation: 'vertical',
-                                },
-                            },
-                        },
-                    },
-                },
-            ],
-            tooltip: {
-                fillSeriesColor: false,
-                x: {
-                    show: false,
-                },
-                y: {
-                    formatter: function (value: number) {
-                        return value;
-                    },
-                },
+        '& .recharts-cartesian-grid-horizontal': {
+            '& line': {
+                stroke: '#495e8e',
             },
         },
-        series: this.props.series,
-    }
-
-    render() {
-        const { classes } = this.props
-
-        return (
-            <div>
-                <Card className={classes.card}>
-                    <CardContent className={classes.cardcontent}>
-                        <Typography className={classes.title} gutterBottom>
-                            Infections by health care district
-                        </Typography>
-                        <div className={classes.chart}>
-                            <ReactApexChart
-                                options={this.state.options}
-                                series={this.state.series}
-                                type={this.state.options.chart.type as any}
-                                width="100%"
-                                height={400}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-}
-
-const mapStatesToProps = (state: AppState) => ({
-    series: getInfectionsByHealthCareDistrictChartData(state)?.series,
-    labels: getInfectionsByHealthCareDistrictChartData(state)?.labels,
+        '& .recharts-tooltip-wrapper': {
+            borderRadius: 5,
+            backgroundColor: '#0c111f',
+            minWidth: 100,
+        },
+    },
+    customTooltip: {
+        background: '#0c111f',
+        paddingLeft: 10,
+        paddingRight: 10,
+        fontSize: 12,
+        fontFamily: 'Roboto',
+    },
+    tooltipValue: {
+        marginTop: 5,
+        marginBottom: 5,
+    },
 })
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
-    return {}
-}
+interface CasesByHealthCareDistrictChartProps { }
 
-const connector = connect(mapStatesToProps, mapDispatchToProps)
-export default connector(withStyles(styles)(CasesByHealthCareDistrictChart))
+export const CasesByHealthCareDistrictChart: React.FunctionComponent<CasesByHealthCareDistrictChartProps> = () => {
+    const classes = useStyles();
+    const data: InfectionsByHealthCareDistrictChartData[] | undefined = useSelector((state: AppState) => getInfectionsByHealthCareDistrictChartData(state));
+
+    const renderTooltip = ({ active, payload, label }: TooltipProps): JSX.Element | null => {
+        if (active && payload !== undefined) {
+            return (
+                <div className={classes.customTooltip}>
+                    {payload.map((p: TooltipPayload, index: number) => (
+                        <p className={classes.tooltipValue} key={index}>
+                            {p.payload.name}: <b style={{ color: getColor(data?.findIndex(data => data.name === p.payload.name)) }}>{`${p.value}`}</b>
+                        </p>
+                    ))}
+                </div>
+            );
+        };
+
+        return null;
+    }
+
+    return (
+        <div>
+            <Card className={classes.card}>
+                <CardContent className={classes.cardcontent}>
+                    <Typography className={classes.title} gutterBottom>
+                        Infections by health care district
+                    </Typography>
+                    <div className={classes.chart}>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart
+                                data={data}
+                                margin={{
+                                    top: 0, right: 0, left: 0, bottom: 10,
+                                }}
+                                className={classes.barChart}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="8 8"
+                                    vertical={false}
+                                />
+                                <YAxis
+                                    tickFormatter={(value: number) => {
+                                        if (value >= 1000000) {
+                                            const result = (value / 1000000).toFixed(1)
+                                            return `${result}M`
+                                        }
+                                        else if (value >= 1000) {
+                                            const result = (value / 1000).toFixed(0)
+                                            return `${result}k`
+                                        } else {
+                                            return value
+                                        }
+                                    }}
+                                />
+
+                                <Tooltip content={renderTooltip} cursor={{fill: '#1d2842'}} />
+
+                                <Legend
+                                    iconSize={12}
+                                    wrapperStyle={{ fontSize: 12, paddingTop: 20 }}
+                                    payload={data?.map((dataPoint: InfectionsByHealthCareDistrictChartData, index: number) => {
+                                        const legendPayload: LegendPayload = {
+                                            value: dataPoint.name,
+                                            type: 'circle',
+                                            id: dataPoint.name,
+                                            color: getColor(index),
+                                        }
+
+                                        return legendPayload;
+                                    })}
+                                />
+
+                                {data !== undefined && (
+                                    <Bar dataKey="data">
+                                        {data.map((entry, index) => (
+                                            <Cell key={`cell-${entry.name}`} fill={getColor(index)} />
+                                        ))}
+                                    </Bar>
+                                )}
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}

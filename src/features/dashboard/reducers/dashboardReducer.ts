@@ -6,6 +6,8 @@ import { HcdTestData } from '../../../entities/HcdTestData'
 import { ThlTestData, ThlTestDataItem } from '../../../entities/ThlTestData'
 import { AppState } from '../../../framework/store/rootReducer'
 import { ChartData } from '../../../entities/ChartData'
+import { InfectionsByHealthCareDistrictChartData } from '../../../entities/InfectionsByHealthCareDistrictChartData'
+import { TestsByHealthCareDistrictChartData } from '../../../entities/TestsByHealthCareDistrictChartData'
 
 // @Note: we are not calculating the rolling average for the past 5 days, since the data for these days 
 // is still being added to by THL.
@@ -218,7 +220,7 @@ export function getConfirmedChartData(state: AppState): ChartData[] | undefined 
         if (index >= data.length - lastDaysToIgnore) {
             return {
                 unixMilliseconds: dataPoint.unixMilliseconds,
-                value: null,
+                value: undefined,
             }
         } else {
             return {
@@ -251,7 +253,7 @@ export function getConfirmedStillBeingUpdated(state: AppState): ChartData[] | un
         } else {
             return {
                 unixMilliseconds: dataPoint.unixMilliseconds,
-                value: null,
+                value: undefined,
             }
         }
     });
@@ -289,7 +291,7 @@ export function getConfirmedChartDataSevenDaysRollingAverage(state: AppState): C
         if (i >= data.length - lastDaysToIgnore) {
             sevendaysRollingAverage.push({
                 unixMilliseconds: data[i].unixMilliseconds,
-                value: null,
+                value: undefined,
             });
 
             continue;
@@ -463,7 +465,7 @@ export function getRecoveredChartDataCumulative(state: AppState): ChartData[] | 
     return data
 }
 
-export function getInfectionsByHealthCareDistrictChartData(state: AppState): any {
+export function getInfectionsByHealthCareDistrictChartData(state: AppState): InfectionsByHealthCareDistrictChartData[] | undefined {
     const confirmedCases: Confirmed[] | undefined = getData(state)?.confirmed
     if (confirmedCases === undefined) {
         return undefined
@@ -513,51 +515,43 @@ export function getInfectionsByHealthCareDistrictChartData(state: AppState): any
         series.push(count)
     }
 
-    let generatedSeries: any = []
+    let result: InfectionsByHealthCareDistrictChartData[] = []
     for (let i = 0; i < generatedLabels.length; i++) {
         const newDataSeries = {
             name: generatedLabels[i],
-            data: [series[i]],
+            data: series[i],
         }
 
-        generatedSeries.push(newDataSeries)
+        result.push(newDataSeries)
     }
 
-    return {
-        labels: generatedLabels,
-        series: generatedSeries,
-    }
+    result.sort((a, b) => a.name.localeCompare(b.name))
+    return result;
 }
 
-export function getTestsPerHealthCareDistrictChartData(state: AppState): any {
+export function getTestsPerHealthCareDistrictChartData(state: AppState): TestsByHealthCareDistrictChartData[] | undefined {
     const healthCareDistrictData = getHcdTestData(state)
 
     if (healthCareDistrictData === undefined) {
         return undefined
     }
 
-    let generatedLabels: string[] = []
-    let generatedSeries: any[] = []
+    let result: TestsByHealthCareDistrictChartData[] = [];
     for (const district in healthCareDistrictData) {
         if (district === 'Kaikki sairaanhoitopiirit') {
             continue
         }
 
-        const districtName = district
-        const districtTestCases = healthCareDistrictData[district].tested
         const newDataSeries = {
-            name: districtName,
-            data: [districtTestCases],
+            name: district,
+            data: healthCareDistrictData[district].tested,
         }
 
-        generatedLabels.push(districtName)
-        generatedSeries.push(newDataSeries)
+        result.push(newDataSeries)
     }
 
-    return {
-        labels: generatedLabels,
-        series: generatedSeries,
-    }
+    result.sort((a, b) => a.name.localeCompare(b.name))
+    return result;
 }
 
 function getOldestDate(confirmed: Confirmed[]): Date | undefined {
