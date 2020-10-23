@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux'
 import { AppState } from '../../../framework/store/rootReducer'
 import { getInfectionsByHealthCareDistrictChartData } from '../reducers/dashboardReducer'
 import { InfectionsByHealthCareDistrictChartData } from '../../../entities/InfectionsByHealthCareDistrictChartData'
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, Legend, LegendPayload, ResponsiveContainer, Tooltip, TooltipPayload, TooltipProps, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, Legend, LegendPayload, ResponsiveContainer, Tooltip, TooltipPayload, TooltipProps, YAxis } from 'recharts'
 import { getColor } from '../../../utils'
 
 const useStyles = makeStyles({

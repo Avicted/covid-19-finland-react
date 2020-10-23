@@ -115,7 +115,7 @@ class Dashboard extends Component<DashboardProps> {
                         <TestedPerHealthCareDistrictChart />
                     </Grid>
                     <Grid item xs={12}>
-                        {/* <FinlandMap /> */}
+                        <FinlandMap />
                     </Grid>
                 </Grid>
             </Container>
