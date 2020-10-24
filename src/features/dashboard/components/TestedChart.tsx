@@ -8,8 +8,8 @@ import {
 import { ChartData } from '../../../entities/ChartData'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from 'recharts';
-import { format } from 'date-fns';
+} from 'recharts'
+import { format } from 'date-fns'
 
 const useStyles = makeStyles({
     cardcontent: {
@@ -71,11 +71,13 @@ const useStyles = makeStyles({
 interface TestedChartProps {
     title: string;
     tests: ChartData[] | undefined;
+    logarithmic?: boolean;
 }
 
 export const TestedChart: React.FunctionComponent<TestedChartProps> = ({
     title,
     tests,
+    logarithmic,
 }) => {
     const classes: Record<string, string> = useStyles();
 
@@ -129,6 +131,10 @@ export const TestedChart: React.FunctionComponent<TestedChartProps> = ({
                                     minTickGap={40}
                                 />
                                 <YAxis
+                                    scale={logarithmic === true ? 'log' : 'auto'}
+                                    domain={logarithmic === true ? [0.01, 'dataMax'] : [0, 'auto']} 
+                                    allowDataOverflow
+                                    dataKey="value"
                                     tickFormatter={(value: number) => {
                                         if (value >= 1000000) {
                                             const result = (value / 1000000).toFixed(1)

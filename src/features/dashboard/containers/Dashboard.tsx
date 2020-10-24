@@ -98,7 +98,7 @@ class Dashboard extends Component<DashboardProps> {
                         <CasesByDayChart />
                     </Grid>
                     <Grid item xs={12} lg={6}>
-                        <CasesByDayChartCumulativeChart />
+                        <CasesByDayChartCumulativeChart logarithmic={true} />
                     </Grid>
 
                     <Grid item xs={12} lg={6}>

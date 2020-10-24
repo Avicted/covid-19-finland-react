@@ -71,9 +71,13 @@ const useStyles = makeStyles({
     },
 })
 
-interface CasesByDayChartCumulativeChartProps { }
+interface CasesByDayChartCumulativeChartProps { 
+    logarithmic?: boolean;
+}
 
-export const CasesByDayChartCumulativeChart: React.FunctionComponent<CasesByDayChartCumulativeChartProps> = () => {
+export const CasesByDayChartCumulativeChart: React.FunctionComponent<CasesByDayChartCumulativeChartProps> = ({
+    logarithmic,
+}) => {
     const classes = useStyles();
     const confirmed: ChartData[] | undefined = useSelector((state: AppState) => getConfirmedChartDataCumulative(state));
     const deaths: ChartData[] | undefined = useSelector((state: AppState) => getDeathsChartDataCumulative(state));
@@ -145,6 +149,9 @@ export const CasesByDayChartCumulativeChart: React.FunctionComponent<CasesByDayC
                                         minTickGap={40}
                                     />
                                     <YAxis
+                                        scale={logarithmic === true ? 'log' : 'auto'}
+                                        domain={logarithmic === true ? [1, 'dataMax'] : [0, 'auto']} 
+                                        allowDataOverflow
                                         tickFormatter={(value: number) => {
                                             if (value >= 1000000) {
                                                 const result = (value / 1000000).toFixed(1)
