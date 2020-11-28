@@ -234,7 +234,7 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
 
     const infoPanel = (): JSX.Element => {
         if (!selectedHealthcareDistrict?.name) {
-            return <p>Click on a healthcare district to view data</p>;
+            return <p className="font-sans text-sm text-white">Click on a healthcare district to view data</p>;
         }
 
         let infected: number | undefined = undefined;
@@ -281,7 +281,7 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
                     Total infections by health care district map
                 </h1>
                 <div className="pt-2 pb-2 h-full relative">
-                    <div className="w-300 bg-gray-900 float-right absolute top-5 right-5 z-10 p-4 font-sans shadow-md rounded-md" id="features">
+                    <div className="w-300 bg-gray-800 float-right absolute top-5 right-5 z-10 p-4 font-sans shadow-md rounded-md" id="features">
                         {infoPanel()}
                     </div>
                     <div ref={mapContainer} className="h-full" />
