@@ -1,5 +1,11 @@
 ## Description
 React web app that displays COVID-19 data for Finland.
+    
+Uses the following technologies:
+* React + TypeScript
+* Redux + Saga
+* Tailwindcss
+* VSCode remote development container
 
 ---
 
