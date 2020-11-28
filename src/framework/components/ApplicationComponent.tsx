@@ -6,7 +6,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { HcdTestData } from '../../entities/HcdTestData'
 import { FinnishCoronaData } from '../../entities/FinnishCoronaData'
 import { fetchData, fetchHcdTestData, fetchTHLData } from '../../features/dashboard/actions/dataActions'
-import { getData, getHcdTestData, getLoadingData, getLoadingHcdTestData, getLoadingThlTestData, getThlTestData } from '../../features/dashboard/reducers/dashboardReducer'
+import { getData, getHcdTestData, getLoadingData, getLoadingDataError, getLoadingHcdTestData, getLoadingHcdTestDataError, getLoadingThlTestData, getLoadingThlTestDataError, getThlTestData } from '../../features/dashboard/reducers/dashboardReducer'
 import { ThlTestData } from '../../entities/ThlTestData'
 
 export interface ApplicationComponentProps extends RouteComponentProps {
@@ -16,6 +16,9 @@ export interface ApplicationComponentProps extends RouteComponentProps {
     finnishCoronaData: FinnishCoronaData | undefined;
     hcdTestData: HcdTestData | undefined;
     thlTestData: ThlTestData | undefined
+    loadingDataError: string | undefined;
+    loadingHcdTestDataError: string | undefined;
+    loadingThlTestDataError: string | undefined;
     onFetchData: () => any;
     onFetchHcdTestData: () => any;
     onFetchThlData: () => any;
@@ -28,7 +31,7 @@ export interface ApplicationComponentState {
 class ApplicationComponent extends React.Component<ApplicationComponentProps, ApplicationComponentState> {
     constructor(props: Readonly<ApplicationComponentProps>) {
         super(props)
-        this.shouldComponentRender = this.shouldComponentRender.bind(this)
+        this.isLoading = this.isLoading.bind(this)
         const { onFetchData, onFetchHcdTestData, onFetchThlData } = this.props
     
         onFetchData()
@@ -36,32 +39,39 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
         onFetchThlData()
     }
 
-    shouldComponentRender() {
+    isLoading(): boolean {
         const { 
             loadingHcdTestData, 
             loadingFinnishCoronaData,
             loadingThlTestData,
-            hcdTestData, 
-            finnishCoronaData,
-            thlTestData,
         } = this.props
 
         if (loadingHcdTestData === true || loadingFinnishCoronaData === true || loadingThlTestData === true) {
-            return false
-        } else if (hcdTestData === undefined || finnishCoronaData === undefined || thlTestData === undefined) {
-            return false
-        } else if (Object.keys(hcdTestData).length === 0 || finnishCoronaData.confirmed.length === 0) {
-            return false
-        } else {
             return true
         }
+
+        return false
+    }
+
+    error(): boolean {
+        const {
+            loadingDataError,
+             loadingHcdTestDataError,
+            loadingThlTestDataError,
+        } = this.props
+
+        if (loadingDataError || loadingHcdTestDataError || loadingThlTestDataError) {
+            return true
+        }
+
+        return false
     }
 
     render() {
         const { children } = this.props
         let content: React.ReactNode
 
-        if (!this.shouldComponentRender()) {
+        if (this.isLoading()) {
             content = (
                 <main>
                     <div className="h-screen w-screen flex flex-row	justify-center items-center text-purple-400">
@@ -72,11 +82,18 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
                     </div>
                 </main>
             )
+        } else if (this.error()) {
+            content = (
+                <div className="h-screen w-screen flex flex-row	justify-center items-center">
+                    <div className="flex flex-col items-center">
+                        <div className="text-sm font-sans text-red-400">An error occurred while fetching data</div>
+                        <div className="text-sm font-sans text-red-400">Please try again later</div>
+                    </div>
+                </div>
+            )
         } else {
             content = (
-                <>
-                    <main>{children}</main>
-                </>
+                <main>{children}</main>
             );
         }
 
@@ -95,6 +112,10 @@ const mapStateToProps = (state: AppState) => ({
     finnishCoronaData: getData(state),
     hcdTestData: getHcdTestData(state),
     thlTestData: getThlTestData(state),
+
+    loadingDataError: getLoadingDataError(state),
+    loadingHcdTestDataError: getLoadingHcdTestDataError(state),
+    loadingThlTestDataError: getLoadingThlTestDataError(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
