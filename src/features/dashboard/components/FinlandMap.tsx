@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Card, CardContent, makeStyles, Theme, Typography } from '@material-ui/core'
 import hcdCentroidGeoJson from './../../../resources/hcdcentroidgeo.json'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { HcdTestData } from '../../../entities/HcdTestData'
@@ -14,58 +13,6 @@ import { SelectedHealcareDistrict } from '../../../entities/SelectedHealthcareDi
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN as string;
 
-const useStyles = makeStyles((theme: Theme) => ({
-    card: {
-        minHeight: 800,
-        display: 'flex',
-        flexDirection: 'row',
-        [theme.breakpoints.down('sm')]: {
-            minHeight: 'calc(100vh - 50px)',
-        }
-    },
-    title: {
-        fontSize: 14,
-        marginBottom: 0,
-        paddingBottom: 10,
-        display: 'flex',
-    },
-    cardcontent: {
-        position: 'relative',
-        width: '100%',
-    },
-    mapContainer: {
-        minHeight: 'calc(100% - 25px)',
-    },
-    infoTitle: {
-        color: theme.palette.text.primary,
-        margin: 0,
-        marginBottom: 10,
-        fontSize: '0.8rem',
-    },
-    info: {
-        width: 300,
-        float: 'right',
-        position: 'absolute',
-        zIndex: 5,
-        right: 40,
-        top: 70,
-        padding: '1rem',
-        background: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-        fontFamily: 'Roboto',
-        boxShadow: '0 0 20px 0px rgb(87 97 178)',
-        borderRadius: '5px',
-    },
-    dataParagraph: {
-        margin: 0,
-        padding: 0,
-        color: theme.palette.text.secondary,
-        '& b': {
-            color: theme.palette.text.primary,
-        },
-    },
-}))
-
 type Coords = {
     lat: number,
     lng: number,
@@ -75,7 +22,6 @@ type Coords = {
 interface FinlandMapProps { }
 
 export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
-    const classes = useStyles(useStyles);
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const [map, setMap] = useState<mapboxgl.Map | undefined>(undefined);
     const hcdTestData: HcdTestData | undefined = useSelector((state: AppState) => getHcdTestData(state));
@@ -314,31 +260,33 @@ export const FinlandMap: React.FunctionComponent<FinlandMapProps> = () => {
         }
 
         const content: JSX.Element = (
-            <>
-                <h4 className={classes.infoTitle}>Healthcare district information</h4>
-                <p className={classes.dataParagraph}>District: <b>{selectedHealthcareDistrict?.name}</b></p>
-                <p className={classes.dataParagraph}>Infections: <b>{infected === undefined ? 'Unknown' : infected}</b></p>
-                <p className={classes.dataParagraph}>Population: <b>{population === undefined ? 'Unknown' : population}</b></p>
-                <p className={classes.dataParagraph}>Tested: <b>{tested === undefined ? 'Unknown' : tested}</b></p>
-                <p className={classes.dataParagraph}>Percentage tested: <b>{percentageTested === undefined ? 'Unknown' : percentageTested}%</b></p>
-                <p className={classes.dataParagraph}>Percentage infected: <b>{percentageInfected === undefined ? 'Unknown' : percentageInfected}%</b></p>
-            </>
+            <div className="font-sans text-white">
+                <h4 className="mb-4 text-sm">Healthcare district information</h4>
+                <p className="text-xs">District: <b>{selectedHealthcareDistrict?.name}</b></p>
+                <p className="text-xs">Infections: <b>{infected === undefined ? 'Unknown' : infected}</b></p>
+                <p className="text-xs">Population: <b>{population === undefined ? 'Unknown' : population}</b></p>
+                <p className="text-xs">Tested: <b>{tested === undefined ? 'Unknown' : tested}</b></p>
+                <p className="text-xs">Percentage tested: <b>{percentageTested === undefined ? 'Unknown' : percentageTested}%</b></p>
+                <p className="text-xs">Percentage infected: <b>{percentageInfected === undefined ? 'Unknown' : percentageInfected}%</b></p>
+            </div>
         );
 
         return content;
     }
 
     return (
-        <Card className={classes.card}>
-            <CardContent className={classes.cardcontent}>
-                <Typography className={classes.title} gutterBottom>
+        <div className="flex flex-row dark bg-gray-800 shadow-sm rounded p-4 text-white font-sans min-h-screen md:min-h-800">
+            <div className="block relative w-full overflow-hidden">
+                <h1 className="text-sm text-white pb-4">
                     Total infections by health care district map
-                </Typography>
-                <div className={classes.info} id="features">
-                    {infoPanel()}
+                </h1>
+                <div className="pt-2 pb-2 h-full relative">
+                    <div className="w-300 bg-gray-900 float-right absolute top-5 right-5 z-10 p-4 font-sans shadow-md rounded-md" id="features">
+                        {infoPanel()}
+                    </div>
+                    <div ref={mapContainer} className="h-full" />
                 </div>
-                <div ref={mapContainer} className={classes.mapContainer} />
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

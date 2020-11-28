@@ -1,9 +1,6 @@
 import React from 'react'
-import { Theme, createStyles, withStyles, CssBaseline, ThemeProvider, CircularProgress } from '@material-ui/core'
 import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
-import theme from '../../theme/theme'
-import { Footer } from './Footer'
 import { AppState } from '../store/rootReducer'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { HcdTestData } from '../../entities/HcdTestData'
@@ -12,28 +9,7 @@ import { fetchData, fetchHcdTestData, fetchTHLData } from '../../features/dashbo
 import { getData, getHcdTestData, getLoadingData, getLoadingHcdTestData, getLoadingThlTestData, getThlTestData } from '../../features/dashboard/reducers/dashboardReducer'
 import { ThlTestData } from '../../entities/ThlTestData'
 
-const styles = (theme: Theme) =>
-    createStyles({
-        root: {
-            height: '100vh',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-        },
-        main: {
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-        },
-        loader: {
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '50vh',
-        },
-    })
-
 export interface ApplicationComponentProps extends RouteComponentProps {
-    classes: Record<string, string>;
     loadingFinnishCoronaData: boolean;
     loadingHcdTestData: boolean;
     loadingThlTestData: boolean;
@@ -82,32 +58,31 @@ class ApplicationComponent extends React.Component<ApplicationComponentProps, Ap
     }
 
     render() {
-        const { classes, children } = this.props
+        const { children } = this.props
         let content: React.ReactNode
 
         if (!this.shouldComponentRender()) {
             content = (
-                <main className={classes.main}>
-                    <div className={classes.loader}>
-                        <CircularProgress />
+                <main>
+                    <div className="h-screen w-screen flex flex-row	justify-center items-center text-purple-400">
+                        <svg className="animate-spin h-10 w-10" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </div>
                 </main>
             )
         } else {
             content = (
                 <>
-                    <main className={classes.main}>{children}</main>
-                    <Footer />
+                    <main>{children}</main>
                 </>
             );
         }
 
         return (
-            <div className={classes.root}>
-                <ThemeProvider theme={theme}>
-                    <CssBaseline />
-                    {content}
-                </ThemeProvider>
+            <div className="bg-gray-900">
+                {content}
             </div>
         )
     }
@@ -136,4 +111,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     }
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(ApplicationComponent)))
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ApplicationComponent))

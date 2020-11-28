@@ -1,12 +1,5 @@
 import React, { Component } from 'react'
-import { Container, Grid, Box, withStyles, Theme, createStyles } from '@material-ui/core'
 import { KPICard } from '../components/KPICard'
-import purple from '@material-ui/core/colors/purple'
-import green from '@material-ui/core/colors/green'
-import red from '@material-ui/core/colors/red'
-import grey from '@material-ui/core/colors/grey'
-import amber from '@material-ui/core/colors/amber'
-import pink from '@material-ui/core/colors/pink'
 import { CasesByDayChart } from '../components/CasesByDayChart'
 import { CasesByDayChartCumulativeChart } from '../components/CasesByDayChartCumulative'
 import { connect } from 'react-redux'
@@ -28,16 +21,10 @@ import {
 } from '../reducers/dashboardReducer'
 import { ChartData } from '../../../entities/ChartData'
 import { FinlandMap } from '../components/FinlandMap'
+import { Footer } from '../../../framework/components/Footer'
 
-const styles = (theme: Theme) =>
-    createStyles({
-        container: {
-            marginTop: 20,
-        },
-    })
 
 interface DashboardProps {
-    classes: Record<string, string>
     totalRecovered: number | undefined
     totalDeaths: number | undefined
     infectionsPastSevenDays: number | undefined;
@@ -51,7 +38,6 @@ interface DashboardProps {
 
 class Dashboard extends Component<DashboardProps> {
     render() {
-        const { classes } = this.props
         const {
             totalInfected,
             percentageOfPopulationTested,
@@ -64,61 +50,48 @@ class Dashboard extends Component<DashboardProps> {
         } = this.props
 
         return (
-            <Container className={classes.container} maxWidth="xl">
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Box fontWeight="fontWeightLight" fontSize="h5.fontSize">
-                            Finland COVID-19 data
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Confirmed cases" data={totalInfected} color={purple[200]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Recovered cases" data={totalRecovered} color={green[200]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Deaths" data={totalDeaths} color={red[300]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Infections past 7 days" data={infectionsPastSevenDays} color={grey[200]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
+            <div className="container mx-auto mt-4 pl-4 pr-4">
+                <div className="grid gap-4">
+                    <div className="grid-cols-12">
+                        <div className="font-sans text-2xl text-white">Finland COVID-19 data</div>
+                    </div>
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-6 sm:grid-rows-3 sm:grid-cols-2 xl:grid-rows-1 xl:grid-cols-6 gap-4">
+                        <KPICard title="Confirmed cases" data={totalInfected} color={'text-purple-300'} />
+                        <KPICard title="Recovered cases" data={totalRecovered} color={'text-green-300'} />
+                        <KPICard title="Deaths" data={totalDeaths} color={'text-red-300'} />
+                        <KPICard title="Infections past 7 days" data={infectionsPastSevenDays} color={'text-gray-300'} />
                         <KPICard
                             title="% of population tested"
                             data={percentageOfPopulationTested + ' %'}
-                            color={amber[300]}
+                            color={'text-yellow-300'}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={2}>
-                        <KPICard title="Tested cases" data={totalTested} color={pink[400]} />
-                    </Grid>
+                        <KPICard title="Tested cases" data={totalTested} color={'text-pink-400'} />
+                    </div>
 
-                    <Grid item xs={12} lg={6}>
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-2 sm:grid-rows-1 sm:grid-cols-2 gap-4">
                         <CasesByDayChart />
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
                         <CasesByDayChartCumulativeChart logarithmic={true} />
-                    </Grid>
+                    </div>
 
-                    <Grid item xs={12} lg={6}>
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-2 sm:grid-rows-1 sm:grid-cols-2 gap-4">
                         <TestedChart title="Tests by day" tests={testsChartData} />
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
                         <TestedChart title="Tests by day (cumulative)" tests={testsChartDataCumulative} />
-                    </Grid>
+                    </div>
 
-                    <Grid item xs={12} lg={6}>
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-2 sm:grid-rows-1 sm:grid-cols-2 gap-4">
                         <CasesByHealthCareDistrictChart />
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
                         <TestedPerHealthCareDistrictChart />
-                    </Grid>
-                    <Grid item xs={12}>
+                    </div>
+
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-1 gap-4">
                         <FinlandMap />
-                    </Grid>
-                </Grid>
-            </Container>
+                    </div>
+
+                    <div className="grid grid-flow-col grid-cols-1 grid-rows-1 gap-4">
+                        <Footer />
+                    </div>
+                </div>
+            </div>
         )
     }
 }
@@ -143,4 +116,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Dashboard))
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)
