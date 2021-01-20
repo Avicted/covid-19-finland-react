@@ -1,4 +1,4 @@
-export interface SelectedHealcareDistrict {
+export interface SelectedHealthcareDistrict {
     name: string;
     layerId: string;
 }

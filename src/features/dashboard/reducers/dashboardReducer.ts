@@ -8,6 +8,7 @@ import { AppState } from '../../../framework/store/rootReducer'
 import { ChartData } from '../../../entities/ChartData'
 import { InfectionsByHealthCareDistrictChartData } from '../../../entities/InfectionsByHealthCareDistrictChartData'
 import { TestsByHealthCareDistrictChartData } from '../../../entities/TestsByHealthCareDistrictChartData'
+import { createSelector } from 'reselect'
 
 // @Note: we are not calculating the rolling average for the past 5 days, since the data for these days 
 // is still being added to by THL.
@@ -96,49 +97,60 @@ export function dashboardReducer(state: DashboardState = initialState, action: D
     }
 }
 
-export function getData(state: AppState): FinnishCoronaData | undefined {
-    return state.dashboard.data
-}
+export const getData = createSelector(
+    (state: AppState) => state.dashboard.data,
+    (data): FinnishCoronaData | undefined => data,
+)
 
-export function getLoadingData(state: AppState): boolean {
-    return state.dashboard.loadingData
-}
+export const getLoadingData = createSelector(
+    (state: AppState) => state.dashboard.loadingData,
+    (loadingData): boolean => loadingData,
+)
 
-export function getLoadingDataError(state: AppState): string | undefined {
-    return state.dashboard.loadingDataError
-}
+export const getLoadingDataError = createSelector(
+    (state: AppState) => state.dashboard.loadingDataError,
+    (loadingDataError): string | undefined => loadingDataError
+)
 
-export function getHcdTestData(state: AppState): HcdTestData | undefined {
-    return state.dashboard.hcdTestData
-}
+export const getHcdTestData = createSelector(
+    (state: AppState) => state.dashboard.hcdTestData,
+    (hcdTestData): HcdTestData | undefined => hcdTestData,
+)
 
-export function getLoadingHcdTestData(state: AppState): boolean {
-    return state.dashboard.loadingHcdTestData
-}
+export const getLoadingHcdTestData = createSelector(
+    (state: AppState) => state.dashboard.loadingHcdTestData,
+    (loadingHcdTestData): boolean => loadingHcdTestData,
+)
 
-export function getLoadingHcdTestDataError(state: AppState): string | undefined {
-    return state.dashboard.loadingHcdTestDataError
-}
+export const getLoadingHcdTestDataError = createSelector(
+    (state: AppState) => state.dashboard.loadingHcdTestDataError,
+    (loadingHcdTestDataError): string | undefined => loadingHcdTestDataError,
+)
 
-export function getThlTestData(state: AppState): ThlTestData | undefined {
-    return state.dashboard.thlTestData
-}
+export const getThlTestData = createSelector(
+    (state: AppState) => state.dashboard.thlTestData,
+    (thlTestData): ThlTestData | undefined => thlTestData,
+)
 
-export function getLoadingThlTestData(state: AppState): boolean {
-    return state.dashboard.loadingThlTestData
-}
+export const getLoadingThlTestData = createSelector(
+    (state: AppState) => state.dashboard.loadingThlTestData,
+    (loadingThlTestData): boolean => loadingThlTestData,
+)
 
-export function getLoadingThlTestDataError(state: AppState): string | undefined {
-    return state.dashboard.loadingThlTestDataError
-}
+export const getLoadingThlTestDataError = createSelector(
+    (state: AppState) => state.dashboard.loadingThlTestDataError,
+    (loadingThlTestDataError): string | undefined => loadingThlTestDataError,
+)
 
-export function getTotalRecovered(state: AppState): number | undefined {
-    return state.dashboard.data?.recovered.length
-}
+export const getTotalRecovered = createSelector(
+    (state: AppState) => state.dashboard.data?.recovered.length,
+    (recovered): number | undefined => recovered,
+)
 
-export function getTotalDeaths(state: AppState): number | undefined {
-    return state.dashboard.data?.deaths.length
-}
+export const getTotalDeaths = createSelector(
+    (state: AppState) => state.dashboard.data?.deaths.length,
+    (deaths): number | undefined => deaths,
+)
 
 export function getTotalInfected(state: AppState): number | undefined {
     if (state.dashboard.hcdTestData) {
@@ -148,7 +160,7 @@ export function getTotalInfected(state: AppState): number | undefined {
     }
 }
 
-export function getConfirmedPastSevenDays(state: AppState): number | undefined {
+export function getConfirmedPastSevenDays(state: AppState): number | undefined {
     const confirmedCases = getData(state)?.confirmed
     if (confirmedCases === undefined) {
         return undefined;
@@ -172,7 +184,7 @@ export function getConfirmedPastSevenDays(state: AppState): number | undefined 
             break;
         }
     }
-    
+
     return confirmedCasesPastSevenDays;
 }
 
@@ -242,7 +254,7 @@ export function getConfirmedStillBeingUpdated(state: AppState): ChartData[] | un
     const data = generateMissingDates(state, confirmed)
     if (data === undefined) {
         return undefined;
-    } 
+    }
 
     let confirmedStillBeingUpdated: ChartData[] = data.map((dataPoint: ChartData, index: number) => {
         if (index >= data.length - lastDaysToIgnore) {
@@ -355,7 +367,7 @@ export function getTestsPerDayChartData(state: AppState): ChartData[] | undefine
         const date = new Date(datetime).toISOString().substr(0, 10)
         const milliseconds = new Date(date).getTime()
         data.push({
-            unixMilliseconds: milliseconds, 
+            unixMilliseconds: milliseconds,
             value: tested[i].value,
         })
     }
@@ -394,13 +406,13 @@ export function getTestsPerDayChartDataCumulative(state: AppState): ChartData[] 
 
     dateRange.forEach(date => {
         const dateString: string = formatISO(Date.parse(date.toISOString()), { representation: 'date' });
-        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000; 
+        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000;
         generatedDates.push({
             unixMilliseconds: milliseconds,
             value: 0,
         })
     })
-    
+
     // Assign the data to the generated dates
     for (let i = 0; i < generatedDates.length; i++) {
         const currentMilliseconds = generatedDates[i].unixMilliseconds
@@ -579,7 +591,7 @@ function generateMissingDates(state: AppState, data: Confirmed[] | Deaths[] | Re
 
     for (let i = 0; i < casesCount; i++) {
         const date: string = formatISO(Date.parse(cases[i].date), { representation: 'date' });
-        const milliseconds: number = getUnixTime(new Date(date)) * 1000; 
+        const milliseconds: number = getUnixTime(new Date(date)) * 1000;
 
         // Is the current date already stored? If so, increment the case count
         const datesToProcess = casesByDay.length
@@ -598,7 +610,7 @@ function generateMissingDates(state: AppState, data: Confirmed[] | Deaths[] | Re
         // If not store it
         if (!dateAlreadyProcessed) {
             casesByDay.push({
-                unixMilliseconds: milliseconds, 
+                unixMilliseconds: milliseconds,
                 value: 1,
             })
         }
@@ -624,7 +636,7 @@ function generateMissingDates(state: AppState, data: Confirmed[] | Deaths[] | Re
 
     dateRange.forEach(date => {
         const dateString: string = formatISO(Date.parse(date.toISOString()), { representation: 'date' });
-        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000; 
+        const milliseconds: number = getUnixTime(new Date(dateString)) * 1000;
         generatedDates.push({
             unixMilliseconds: milliseconds,
             value: 0,
