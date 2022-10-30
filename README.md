@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/6322199/198869223-2ac54aa0-41f2-4cd0-8efb-1efc4a9b154a.png)
+
 ## Description
 React web app that displays COVID-19 data for Finland.
     
